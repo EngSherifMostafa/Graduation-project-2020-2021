@@ -6,25 +6,24 @@ namespace SmartBatteryCharger
 {
     class DataBaseMngt
     {
-        public static string InsertStm(int batteryPercentage, int chargerStatus)
+        public static string SelectStm(ref DataTable retData) =>
+            ExecSqlCmd(
+                @"Select colIndex as [Index], [colDate] as [Date], [colTime] as [Time], [colBatteryStatus] as [Battery Status], 
+                [colChargerStatus] as [Charger Status] from [tblLogFile]", ref retData);
+
+        public static string InsertStm(int batteryPercentage, int chargerStatus, ref DataTable retData) =>
+            ExecSqlCmd(
+                @$"insert into tblLogFile values ((SELECT CAST(GETDATE() AS Date)) ,(SELECT CONVERT(TIME(0), GETDATE())), 
+                {batteryPercentage}, UPPER('{chargerStatus}'))", ref retData);
+
+        public static string DeleteStm(int recIndex, ref DataTable retData) =>
+            ExecSqlCmd($"Delete from tblLogFile where colIndex = {recIndex}",ref retData);
+
+        private static string ExecSqlCmd(string sqlStm,ref DataTable retData)
         {
-            try
-            {
-                var insertStatement =
-                    @"insert into tblLogFile values((SELECT CAST(GETDATE() AS Date)) ,(SELECT CONVERT(TIME(0), GETDATE()))," +
-                    batteryPercentage + "," + chargerStatus + ")";
-
-                return ExecSqlCmd(insertStatement, new DataTable());
-            }
-
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        public static string ExecSqlCmd(string sqlStm, DataTable dataTbl)
-        {
+            //clear data table to refill it
+            retData.Clear();
+            
             //declare connection string
             const string connStr =
                 @"Data Source=EngSherif;Initial Catalog=DBTheSmartBatteryCharger;Integrated Security=True";
@@ -35,17 +34,17 @@ namespace SmartBatteryCharger
                 var conn = new SqlConnection(connStr);
 
                 //open connection
-                conn.Open();
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
 
                 //execute sql command
-                if (sqlStm != string.Empty)
-                    dataTbl.Load(new SqlCommand(sqlStm, conn).ExecuteReader());
+                retData.Load(new SqlCommand(sqlStm, conn).ExecuteReader());
 
                 //close connection
-                conn.Close();
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
 
-
-                return "Statement executed";
+                return null;
             }
 
             catch (Exception e)

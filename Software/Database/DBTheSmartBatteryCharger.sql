@@ -27,5 +27,3 @@ delete from [tblLogFile] where colIndex = 5
 SELECT CONVERT(TIME(0),GETDATE())
 --get date
 SELECT CAST(GETDATE() AS Date)
-
-https://www.youtube.com/watch?v=R9pXnHIFj_8&list=PL08903FB7ACA1C2FB&index=11

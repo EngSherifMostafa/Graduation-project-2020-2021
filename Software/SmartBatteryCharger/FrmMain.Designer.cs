@@ -31,6 +31,7 @@ namespace SmartBatteryCharger
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.pnlCtrl = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -49,6 +50,10 @@ namespace SmartBatteryCharger
             this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Dgv = new System.Windows.Forms.DataGridView();
             this.btnDelLog = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.lblChargerNow = new System.Windows.Forms.Label();
+            this.lblBatteryNow = new System.Windows.Forms.Label();
             this.pnlCtrl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).BeginInit();
             this.SuspendLayout();
@@ -173,9 +178,9 @@ namespace SmartBatteryCharger
             // btnMinimize
             // 
             this.btnMinimize.BackColor = System.Drawing.Color.SeaGreen;
-            this.btnMinimize.Location = new System.Drawing.Point(173, 356);
+            this.btnMinimize.Location = new System.Drawing.Point(524, 368);
             this.btnMinimize.Name = "btnMinimize";
-            this.btnMinimize.Size = new System.Drawing.Size(168, 82);
+            this.btnMinimize.Size = new System.Drawing.Size(168, 72);
             this.btnMinimize.TabIndex = 0;
             this.btnMinimize.Text = "Minimize";
             this.btnMinimize.UseVisualStyleBackColor = false;
@@ -219,6 +224,14 @@ namespace SmartBatteryCharger
             this.Dgv.AllowUserToResizeRows = false;
             this.Dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.Dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.Dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.Dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.Dgv.Location = new System.Drawing.Point(524, 12);
             this.Dgv.MultiSelect = false;
@@ -230,24 +243,65 @@ namespace SmartBatteryCharger
             this.Dgv.Size = new System.Drawing.Size(698, 338);
             this.Dgv.TabIndex = 1;
             this.Dgv.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_RowEnter);
+            this.Dgv.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.Dgv_RowsRemoved);
             // 
             // btnDelLog
             // 
             this.btnDelLog.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.btnDelLog.Location = new System.Drawing.Point(790, 356);
+            this.btnDelLog.Location = new System.Drawing.Point(718, 368);
             this.btnDelLog.Name = "btnDelLog";
-            this.btnDelLog.Size = new System.Drawing.Size(168, 82);
+            this.btnDelLog.Size = new System.Drawing.Size(168, 72);
             this.btnDelLog.TabIndex = 2;
             this.btnDelLog.Text = "Delete Log";
             this.btnDelLog.UseVisualStyleBackColor = false;
             this.btnDelLog.Click += new System.EventHandler(this.btnDelLog_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(937, 368);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(151, 28);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Charger Status";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(937, 412);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(194, 28);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "Battery Percentage";
+            // 
+            // lblChargerNow
+            // 
+            this.lblChargerNow.AutoSize = true;
+            this.lblChargerNow.Location = new System.Drawing.Point(1137, 368);
+            this.lblChargerNow.Name = "lblChargerNow";
+            this.lblChargerNow.Size = new System.Drawing.Size(31, 28);
+            this.lblChargerNow.TabIndex = 4;
+            this.lblChargerNow.Text = "cs";
+            // 
+            // lblBatteryNow
+            // 
+            this.lblBatteryNow.AutoSize = true;
+            this.lblBatteryNow.Location = new System.Drawing.Point(1137, 412);
+            this.lblBatteryNow.Name = "lblBatteryNow";
+            this.lblBatteryNow.Size = new System.Drawing.Size(36, 28);
+            this.lblBatteryNow.TabIndex = 4;
+            this.lblBatteryNow.Text = "bp";
             // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1234, 457);
+            this.ClientSize = new System.Drawing.Size(1234, 463);
+            this.Controls.Add(this.lblBatteryNow);
+            this.Controls.Add(this.lblChargerNow);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.btnDelLog);
             this.Controls.Add(this.Dgv);
             this.Controls.Add(this.btnMinimize);
@@ -265,6 +319,7 @@ namespace SmartBatteryCharger
             this.pnlCtrl.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -288,6 +343,10 @@ namespace SmartBatteryCharger
         private System.Windows.Forms.DataGridViewTextBoxColumn Time;
         private System.Windows.Forms.DataGridView Dgv;
         private System.Windows.Forms.Button btnDelLog;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label lblChargerNow;
+        private System.Windows.Forms.Label lblBatteryNow;
     }
 }
 

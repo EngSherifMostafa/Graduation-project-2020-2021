@@ -1,39 +1,34 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace SmartBatteryCharger
 {
     internal partial class FrmMain : Form
     {
-        private DataTable _dataTbl;
+        //initialize data table to be data source for data grid view
+        private DataTable _dataTbl = new();
 
         public FrmMain()
         {
             InitializeComponent();
-        }
 
-        //fill textboxes according to row index passed
-        private void FillTextBoxes(int rowIndex)
-        {
-            txtIndex.Text = _dataTbl.Rows[rowIndex][0].ToString();
-            txtDate.Text = DateTime.Parse(_dataTbl.Rows[rowIndex][1].ToString() ?? string.Empty).ToLongDateString();
-            txtTime.Text = _dataTbl.Rows[rowIndex][2].ToString();
-            txtBatteryPercentage.Text = _dataTbl.Rows[rowIndex][3].ToString();
-            txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
+            //add SystemEvents_PowerModeChanged event using Microsoft.Win32 API
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
         }
 
         //get data from database
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            _dataTbl = new DataTable();
-            var retVal = DataBaseMngt.ExecSqlCmd(
-                "Select colIndex as [Index], [colDate] as [Date], [colTime] as [Time], " +
-                "[colBatteryStatus] as [Battery Status], [colChargerStatus] as [Charger Status] " +
-                "from [tblLogFile]", _dataTbl);
-            
-            if (retVal != "Statement executed")
-                MessageBox.Show(retVal);
+            //raising SystemEvents_PowerModeChanged event at the begin of application
+            SystemEvents_PowerModeChanged(this, null);
+            var errMsg = DataBaseMngt.SelectStm(ref _dataTbl);
+
+            if (errMsg != null)
+                MessageBox.Show(errMsg);
+
             else
                 Dgv.DataSource = _dataTbl;
         }
@@ -41,16 +36,27 @@ namespace SmartBatteryCharger
         //delete log record
         private void btnDelLog_Click(object sender, EventArgs e)
         {
-            if ((MessageBox.Show(@$"Are you sure that you want to delete record number:{txtIndex.Text} ?", @"Delete Confirmation",
-                MessageBoxButtons.YesNo)) != DialogResult.Yes) return;
+            //there is no row to delete it
+            if(_dataTbl.Rows.Count == 0)
+                return;
+
+            var delIndex = int.Parse(txtIndex.Text);
             
-            var retVal = DataBaseMngt.ExecSqlCmd($"Delete from tblLogFile where colIndex = {txtIndex.Text}",
-                _dataTbl);
+            //check message before delete
+            if ((MessageBox.Show(@$"Are you sure that you want to delete record number: {delIndex} ?", @"Delete Confirmation",
+                MessageBoxButtons.YesNo)) != DialogResult.Yes) return;
 
-            //update Dgv
+            var errMsg = DataBaseMngt.DeleteStm(delIndex,ref _dataTbl);
 
-            MessageBox.Show(retVal != "Statement executed" ? retVal : $@"Delete Record at index: {txtIndex.Text}",
-                @"Process Completed Successfully");
+            if (errMsg != null)
+                MessageBox.Show(errMsg);
+            else
+            {
+                //update Dgv
+                DataBaseMngt.SelectStm(ref _dataTbl);
+
+                MessageBox.Show($@"Delete Record at index: {delIndex} was done successfully", @"Process Completed Successfully");
+            }
         }
 
         //minimize form from btnMinimize button
@@ -72,7 +78,40 @@ namespace SmartBatteryCharger
             notifyIcon.ShowBalloonTip(3000);
         }
 
-        //fill text boxes according to user selection from Dgv
+        //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
         private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) => FillTextBoxes(e.RowIndex);
+        private void Dgv_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e) => FillTextBoxes(e.RowIndex);
+        
+        //fill textboxes according to row index passed
+        private void FillTextBoxes(int rowIndex)
+        {
+            //clear text boxes when table has zero rows
+            if (_dataTbl.Rows.Count == 0)
+            {
+                txtIndex.Clear();
+                txtDate.Clear();
+                txtTime.Clear();
+                txtBatteryPercentage.Clear();
+                txtChargerStatus.Clear();
+                return;
+            }
+
+            txtIndex.Text = _dataTbl.Rows[rowIndex][0].ToString();
+            txtDate.Text = DateTime.Parse(_dataTbl.Rows[rowIndex][1].ToString() ?? string.Empty).ToLongDateString();
+            txtTime.Text = _dataTbl.Rows[rowIndex][2].ToString();
+            txtBatteryPercentage.Text = _dataTbl.Rows[rowIndex][3].ToString();
+            txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
+        }
+
+        //PowerModeChanged event
+        private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            var pwrStatus = SystemInformation.PowerStatus;
+            lblChargerNow.Text = pwrStatus.PowerLineStatus.ToString();
+            lblBatteryNow.Text = (pwrStatus.BatteryLifePercent * 100) + @" %";
+
+            //change lblChargerNow label according to charger status
+            lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
+        }
     }
 }
