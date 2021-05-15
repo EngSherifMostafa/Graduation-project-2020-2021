@@ -6,15 +6,21 @@ namespace SmartBatteryCharger
 {
     class DataBaseMngt
     {
-        public static string SelectStm(ref DataTable retData) =>
+        public static string SelectStm(ref DataTable retData, string whereStm = null) =>
             ExecSqlCmd(
-                @"Select colIndex as [Index], [colDate] as [Date], [colTime] as [Time], [colBatteryStatus] as [Battery Status], 
-                [colChargerStatus] as [Charger Status] from [tblLogFile]", ref retData);
+                @$"Select colIndex as [Index], 
+                format ([colDate], 'dd MMMM yyyy') as [Date], 
+                (SELECT format (cast ([colTime] as datetime), 'hh:mm:ss tt')) as [Time], 
+                [colBatteryStatus] as [Battery Status], 
+                [colChargerStatus] as [Charger Status] 
+                from [tblLogFile] {whereStm}", ref retData);
 
-        public static string InsertStm(int batteryPercentage, int chargerStatus, ref DataTable retData) =>
+        public static string InsertStm(ref int batteryPercentage, ref string chargerStatus, ref DataTable retData) =>
             ExecSqlCmd(
-                @$"insert into tblLogFile values ((SELECT CAST(GETDATE() AS Date)) ,(SELECT CONVERT(TIME(0), GETDATE())), 
-                {batteryPercentage}, UPPER('{chargerStatus}'))", ref retData);
+                @$"insert into tblLogFile values (
+                (format (GETDATE(), 'dd MMMM yyyy')), (format (GETDATE(), 'hh:mm:ss tt')), 
+                {batteryPercentage}, '{chargerStatus}')",
+                ref retData);
 
         public static string DeleteStm(int recIndex, ref DataTable retData) =>
             ExecSqlCmd($"Delete from tblLogFile where colIndex = {recIndex}",ref retData);

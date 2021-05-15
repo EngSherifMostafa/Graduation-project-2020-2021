@@ -9,17 +9,18 @@ create table tblLogFile
 	colDate date not null,
 	colTime time not null,
 	colBatteryStatus int not null,
-	colChargerStatus char(3) not null constraint colChargerStatus_Chk check (colChargerStatus in ('ON','OFF'))
+	colChargerStatus char(3) not null constraint colChargerStatus_Chk check (colChargerStatus in ('OnLine','Offline'))
 )
 
 insert into tblLogFile values
 ((SELECT CAST(GETDATE() AS Date)) ,(SELECT CONVERT(TIME(0),GETDATE())), 70, UPPER('on'))
 
-Select [colIndex] as [Index], 
-[colDate] as [Date], [colTime] as [Time], 
+Select colIndex as [Index], 
+format ([colDate], 'dd MMMM yyyy') as [Date], 
+format ([colTime], 'hh:mm:ss') as [Time], 
 [colBatteryStatus] as [Battery Status], 
-[colChargerStatus] as [Battery Status] 
-from tblLogFile
+[colChargerStatus] as [Charger Status] 
+from [tblLogFile]
 
 delete from [tblLogFile] where colIndex = 5
 

@@ -97,7 +97,7 @@ namespace SmartBatteryCharger
             }
 
             txtIndex.Text = _dataTbl.Rows[rowIndex][0].ToString();
-            txtDate.Text = DateTime.Parse(_dataTbl.Rows[rowIndex][1].ToString() ?? string.Empty).ToLongDateString();
+            txtDate.Text = DateTime.Parse(_dataTbl.Rows[rowIndex][1].ToString() ?? string.Empty).ToString(format: "dd MMMM yyyy");
             txtTime.Text = _dataTbl.Rows[rowIndex][2].ToString();
             txtBatteryPercentage.Text = _dataTbl.Rows[rowIndex][3].ToString();
             txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
@@ -108,10 +108,22 @@ namespace SmartBatteryCharger
         {
             var pwrStatus = SystemInformation.PowerStatus;
             lblChargerNow.Text = pwrStatus.PowerLineStatus.ToString();
-            lblBatteryNow.Text = (pwrStatus.BatteryLifePercent * 100) + @" %";
+            lblBatteryNow.Text = (int)(pwrStatus.BatteryLifePercent * 100) + @" %";
 
             //change lblChargerNow label according to charger status
             lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
+        }
+
+        private void btnFilter_Click(object sender, EventArgs e)
+        {
+            var whereStm = @$"Where colDate between '{dtpFrom.Value:dd MMMM yyyy}' and '{dtpTo.Value:dd MMMM yyyy}'";
+
+            //correct condition
+            if (dtpFrom.Value < dtpTo.Value)
+                DataBaseMngt.SelectStm(ref _dataTbl, whereStm);
+
+            else
+                DataBaseMngt.SelectStm(ref _dataTbl);
         }
     }
 }
