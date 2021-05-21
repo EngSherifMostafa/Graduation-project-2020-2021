@@ -2,9 +2,9 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace SmartBatteryCharger
+namespace Smart_Battery_Charger
 {
-    class DataBaseMngt
+    internal class DataBaseMngt
     {
         public static string SelectStm(ref DataTable retData, string whereStm = null) =>
             ExecSqlCmd(
@@ -15,6 +15,8 @@ namespace SmartBatteryCharger
                 [colChargerStatus] as [Charger Status] 
                 from [tblLogFile] {whereStm}", ref retData);
 
+        /*************************************************************************************************************************/
+
         public static string InsertStm(ref int batteryPercentage, ref string chargerStatus, ref DataTable retData) =>
             ExecSqlCmd(
                 @$"insert into tblLogFile values (
@@ -22,8 +24,12 @@ namespace SmartBatteryCharger
                 {batteryPercentage}, '{chargerStatus}')",
                 ref retData);
 
+        /*************************************************************************************************************************/
+
         public static string DeleteStm(int recIndex, ref DataTable retData) =>
             ExecSqlCmd($"Delete from tblLogFile where colIndex = {recIndex}",ref retData);
+
+        /*************************************************************************************************************************/
 
         private static string ExecSqlCmd(string sqlStm,ref DataTable retData)
         {
@@ -58,5 +64,8 @@ namespace SmartBatteryCharger
                 return e.Message;
             }
         }
+
+        /*************************************************************************************************************************/
+
     }
 }

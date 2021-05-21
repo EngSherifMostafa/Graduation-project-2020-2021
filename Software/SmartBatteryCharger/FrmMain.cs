@@ -4,12 +4,14 @@ using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
-namespace SmartBatteryCharger
+namespace Smart_Battery_Charger
 {
     internal partial class FrmMain : Form
     {
         //initialize data table to be data source for data grid view
         private DataTable _dataTbl = new();
+
+        /*************************************************************************************************************************/
 
         public FrmMain()
         {
@@ -18,6 +20,8 @@ namespace SmartBatteryCharger
             //add SystemEvents_PowerModeChanged event using Microsoft.Win32 API
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
         }
+
+        /*************************************************************************************************************************/
 
         //get data from database
         private void FrmMain_Load(object sender, EventArgs e)
@@ -32,6 +36,8 @@ namespace SmartBatteryCharger
             else
                 Dgv.DataSource = _dataTbl;
         }
+
+        /*************************************************************************************************************************/
 
         //delete log record
         private void btnDelLog_Click(object sender, EventArgs e)
@@ -59,29 +65,34 @@ namespace SmartBatteryCharger
             }
         }
 
+        /*************************************************************************************************************************/
+        
         //minimize form from btnMinimize button
         private void btnMinimize_Click(object sender, EventArgs e)
         {
             Hide();
-            notifyIcon.BalloonTipText = @"Smart Battery Charger App has been minimized";
-            notifyIcon.BalloonTipTitle = @"Smart Battery Charger";
-            notifyIcon.ShowBalloonTip(3000);
+            notifyIcon.ShowBalloonTip(
+                3000,
+                null,
+                @"Smart Battery Charger is still running Click here to activate.",
+                ToolTipIcon.Info
+            );
         }
 
+        /*************************************************************************************************************************/
+        
         //maximize form from NotifyIcon
-        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            Visible = true;
-            notifyIcon.Icon = null;
-            notifyIcon.BalloonTipText = @"Smart Battery Charger App has Comeback";
-            notifyIcon.BalloonTipTitle = @"Smart Battery Charger";
-            notifyIcon.ShowBalloonTip(3000);
-        }
+        private void notifyIcon_BalloonTipClicked(object sender, EventArgs e) => Visible = true;
+        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e) => Visible = true;
+
+        /*************************************************************************************************************************/
 
         //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
         private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) => FillTextBoxes(e.RowIndex);
         private void Dgv_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e) => FillTextBoxes(e.RowIndex);
-        
+
+        /*************************************************************************************************************************/
+
         //fill textboxes according to row index passed
         private void FillTextBoxes(int rowIndex)
         {
@@ -103,6 +114,23 @@ namespace SmartBatteryCharger
             txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
         }
 
+        /*************************************************************************************************************************/
+
+        private void btnFilter_Click(object sender, EventArgs e)
+        {
+            var whereStm = @$"Where colDate between '{dtpFrom.Value:dd MMMM yyyy}' and '{dtpTo.Value:dd MMMM yyyy}'";
+
+            //correct condition
+            if (dtpFrom.Value < dtpTo.Value)
+                DataBaseMngt.SelectStm(ref _dataTbl, whereStm);
+            
+            //error dates
+            else
+                DataBaseMngt.SelectStm(ref _dataTbl);
+        }
+
+        /*************************************************************************************************************************/
+
         //PowerModeChanged event
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
@@ -114,16 +142,7 @@ namespace SmartBatteryCharger
             lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
         }
 
-        private void btnFilter_Click(object sender, EventArgs e)
-        {
-            var whereStm = @$"Where colDate between '{dtpFrom.Value:dd MMMM yyyy}' and '{dtpTo.Value:dd MMMM yyyy}'";
+        /*************************************************************************************************************************/
 
-            //correct condition
-            if (dtpFrom.Value < dtpTo.Value)
-                DataBaseMngt.SelectStm(ref _dataTbl, whereStm);
-
-            else
-                DataBaseMngt.SelectStm(ref _dataTbl);
-        }
     }
 }
