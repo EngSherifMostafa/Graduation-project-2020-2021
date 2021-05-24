@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -26,6 +27,8 @@ namespace Smart_Battery_Charger
         //get data from database
         private void FrmMain_Load(object sender, EventArgs e)
         {
+            var batteryMonitor = new BatteryMonitor();
+
             //raising SystemEvents_PowerModeChanged event at the begin of application
             SystemEvents_PowerModeChanged(this, null);
             var errMsg = DataBaseMngt.SelectStm(ref _dataTbl);
