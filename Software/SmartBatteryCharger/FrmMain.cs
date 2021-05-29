@@ -38,17 +38,10 @@ namespace Smart_Battery_Charger
         //get battery percentage
         private void GetBatteryPercentage(object source, EventArgs e)
         {
-            try
+            Invoke(new MethodInvoker(delegate
             {
                 lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
-            }
-            catch (InvalidOperationException)
-            {
-                Invoke(new MethodInvoker(delegate
-                {
-                    lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
-                }));
-            }
+            }));
         }
 
         //PowerModeChanged event
@@ -96,6 +89,7 @@ namespace Smart_Battery_Charger
         {
             //raising SystemEvents_PowerModeChanged event at the begin of application
             SystemEvents_PowerModeChanged(this, null);
+            //select * from database
             var errMsg = DataBaseMngt.SelectStm(ref _dataTbl);
 
             if (errMsg != null)

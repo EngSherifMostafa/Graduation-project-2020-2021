@@ -221,20 +221,20 @@ namespace Smart_Battery_Charger
             this.Dgv.AllowUserToDeleteRows = false;
             this.Dgv.AllowUserToResizeColumns = false;
             this.Dgv.AllowUserToResizeRows = false;
-            this.Dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.Dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.Dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.Dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.Dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.InactiveCaption;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -266,7 +266,7 @@ namespace Smart_Battery_Charger
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(1001, 368);
+            this.label6.Location = new System.Drawing.Point(959, 368);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(151, 28);
             this.label6.TabIndex = 3;
@@ -275,7 +275,7 @@ namespace Smart_Battery_Charger
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(1001, 412);
+            this.label7.Location = new System.Drawing.Point(959, 412);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(194, 28);
             this.label7.TabIndex = 3;
@@ -284,7 +284,7 @@ namespace Smart_Battery_Charger
             // lblChargerNow
             // 
             this.lblChargerNow.AutoSize = true;
-            this.lblChargerNow.Location = new System.Drawing.Point(1201, 368);
+            this.lblChargerNow.Location = new System.Drawing.Point(1159, 368);
             this.lblChargerNow.Name = "lblChargerNow";
             this.lblChargerNow.Size = new System.Drawing.Size(31, 28);
             this.lblChargerNow.TabIndex = 4;
@@ -294,7 +294,7 @@ namespace Smart_Battery_Charger
             // 
             this.lblBatteryNow.AutoSize = true;
             this.lblBatteryNow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.lblBatteryNow.Location = new System.Drawing.Point(1201, 412);
+            this.lblBatteryNow.Location = new System.Drawing.Point(1159, 412);
             this.lblBatteryNow.Name = "lblBatteryNow";
             this.lblBatteryNow.Size = new System.Drawing.Size(36, 28);
             this.lblBatteryNow.TabIndex = 4;
