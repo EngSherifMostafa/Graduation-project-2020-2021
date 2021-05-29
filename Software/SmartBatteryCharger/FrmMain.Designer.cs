@@ -293,6 +293,7 @@ namespace Smart_Battery_Charger
             // lblBatteryNow
             // 
             this.lblBatteryNow.AutoSize = true;
+            this.lblBatteryNow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.lblBatteryNow.Location = new System.Drawing.Point(1201, 412);
             this.lblBatteryNow.Name = "lblBatteryNow";
             this.lblBatteryNow.Size = new System.Drawing.Size(36, 28);

@@ -7,14 +7,9 @@ namespace Smart_Battery_Charger
     internal class BatteryMonitor
     {
         #region initializer
-        private const int StartChargePercentage = 20;
-        private const int StopChargePercentage = 66;
-
-        // 1- define delegate
-        public delegate void ChangeBatteryPercentageEventHandler(object source, EventArgs args);
-
+        // 1- define delegate or use EventHandler<Generic>
         // 2- define event on delegate
-        public event ChangeBatteryPercentageEventHandler PercentChanged;
+        public event EventHandler PercentChanged;
         #endregion
 
         #region eventHandler
@@ -26,18 +21,19 @@ namespace Smart_Battery_Charger
             monitorThread.Start();
         }
 
+        //looping till battery percent change by 1%
         private void CheckPercentageChanging()
         {
-            var pwrStatus = SystemInformation.PowerStatus;
-            var batteryPercentNow = (int)(pwrStatus.BatteryLifePercent * 100);
+            var _batteryInfo = SystemInformation.PowerStatus;
+            var _percentSnapshot = (int)(_batteryInfo.BatteryLifePercent * 100);
 
         tryAgain:
             Thread.Sleep(1000);
-            if (batteryPercentNow != (int)(pwrStatus.BatteryLifePercent * 100))
+            if (_percentSnapshot != (int)(_batteryInfo.BatteryLifePercent * 100))
             {
-
-                MessageBox.Show(@"In Thread Now is: {Thread.CurrentThread.Name} {Thread.CurrentThread.ManagedThreadId}");
+                _percentSnapshot = (int)(_batteryInfo.BatteryLifePercent * 100);
                 OnPercentChanged();
+                goto tryAgain;
             }
 
             else

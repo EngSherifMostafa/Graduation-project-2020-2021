@@ -2,7 +2,6 @@
 using System;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
 using System.Windows.Forms;
 
 namespace Smart_Battery_Charger
@@ -16,12 +15,16 @@ namespace Smart_Battery_Charger
         //initialize PowerStatus to provide info about battery and charger
         private readonly PowerStatus _batteryInfo = SystemInformation.PowerStatus;
 
+        //initialize BatteryMonitor to provide streaming battery percentage
         private readonly BatteryMonitor _batteryMonitor = new();
 
         //constructor
         public FrmMain()
         {
             InitializeComponent();
+
+            //get battery percent at initialization time
+            lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
 
             //add SystemEvents_PowerModeChanged event using Microsoft.Win32 API
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
@@ -35,8 +38,17 @@ namespace Smart_Battery_Charger
         //get battery percentage
         private void GetBatteryPercentage(object source, EventArgs e)
         {
-            var pwrStatus = SystemInformation.PowerStatus;
-            lblBatteryNow.Text = (pwrStatus.BatteryLifePercent * 100).ToString(CultureInfo.InvariantCulture);
+            try
+            {
+                lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
+            }
+            catch (InvalidOperationException)
+            {
+                Invoke(new MethodInvoker(delegate
+                {
+                    lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
+                }));
+            }
         }
 
         //PowerModeChanged event
