@@ -5,6 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>iconApp.ico</ApplicationIcon>
+    <StartupObject>Smart_Battery_Charger.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
