@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
-using Microsoft.Win32;
 
 namespace Smart_Battery_Charger
 {

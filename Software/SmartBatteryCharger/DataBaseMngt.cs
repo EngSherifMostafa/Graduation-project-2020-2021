@@ -27,15 +27,15 @@ namespace Smart_Battery_Charger
         /*************************************************************************************************************************/
 
         public static string DeleteStm(int recIndex, ref DataTable retData) =>
-            ExecSqlCmd($"Delete from tblLogFile where colIndex = {recIndex}",ref retData);
+            ExecSqlCmd($"Delete from tblLogFile where colIndex = {recIndex}", ref retData);
 
         /*************************************************************************************************************************/
 
-        private static string ExecSqlCmd(string sqlStm,ref DataTable retData)
+        private static string ExecSqlCmd(string sqlStm, ref DataTable retData)
         {
             //clear data table to refill it
             retData.Clear();
-            
+
             //declare connection string
             const string connStr =
                 @"Data Source=EngSherif;Initial Catalog=DBTheSmartBatteryCharger;Integrated Security=True";

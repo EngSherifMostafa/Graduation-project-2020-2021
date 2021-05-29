@@ -12,7 +12,7 @@ namespace Smart_Battery_Charger
 
         // 1- define delegate
         public delegate void ChangeBatteryPercentageEventHandler(object source, EventArgs args);
-        
+
         // 2- define event on delegate
         public event ChangeBatteryPercentageEventHandler PercentChanged;
         #endregion
@@ -22,18 +22,18 @@ namespace Smart_Battery_Charger
         public BatteryMonitor()
         {
             //SerialPort serialPort = new SerialPort();
-            var monitorThread = new Thread(CheckPercentageChanging) {Name = "CheckPercentageChanging_Thread", IsBackground = true};
+            var monitorThread = new Thread(CheckPercentageChanging) { Name = "CheckPercentageChanging_Thread", IsBackground = true };
             monitorThread.Start();
         }
 
         private void CheckPercentageChanging()
         {
             var pwrStatus = SystemInformation.PowerStatus;
-            var batteryPercentNow = (int) (pwrStatus.BatteryLifePercent * 100);
+            var batteryPercentNow = (int)(pwrStatus.BatteryLifePercent * 100);
 
-            tryAgain:
+        tryAgain:
             Thread.Sleep(1000);
-            if (batteryPercentNow != (int) (pwrStatus.BatteryLifePercent * 100))
+            if (batteryPercentNow != (int)(pwrStatus.BatteryLifePercent * 100))
             {
 
                 MessageBox.Show(@"In Thread Now is: {Thread.CurrentThread.Name} {Thread.CurrentThread.ManagedThreadId}");
