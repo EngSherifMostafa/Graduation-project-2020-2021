@@ -16,8 +16,8 @@ insert into tblLogFile values
 (
 	(format (GETDATE(), 'dd MMMM yyyy')), 
 	(format (GETDATE(), 'hh:mm:ss tt')), 
-	80, 
-	'Online'
+	70, 
+	'Offline'
 )
 
 delete from [tblLogFile] where colIndex = 5
@@ -26,5 +26,5 @@ Select colIndex as [Index],
 format ([colDate], 'dd MMMM yyyy') as [Date], 
 (SELECT format (cast ([colTime] as datetime), 'hh:mm:ss tt')) as [Time], 
 [colBatteryStatus] as [Battery Status], 
-[colChargerStatus] as [Charger Status] 
+trim([colChargerStatus]) as [Charger Status] 
 from [tblLogFile]

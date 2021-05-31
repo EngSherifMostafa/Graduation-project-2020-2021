@@ -24,20 +24,17 @@ namespace Smart_Battery_Charger
         //looping till battery percent change by 1%
         private void CheckPercentageChanging()
         {
-            var _batteryInfo = SystemInformation.PowerStatus;
-            var _percentSnapshot = (int)(_batteryInfo.BatteryLifePercent * 100);
+            var batteryInfo = SystemInformation.PowerStatus;
+            var percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
 
-        tryAgain:
+            tryAgain:
             Thread.Sleep(1000);
-            if (_percentSnapshot != (int)(_batteryInfo.BatteryLifePercent * 100))
+            if (percentSnapshot != (int) (batteryInfo.BatteryLifePercent * 100))
             {
-                _percentSnapshot = (int)(_batteryInfo.BatteryLifePercent * 100);
+                percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
                 OnPercentChanged();
-                goto tryAgain;
             }
-
-            else
-                goto tryAgain;
+            goto tryAgain;
         }
 
         // 3- raise event

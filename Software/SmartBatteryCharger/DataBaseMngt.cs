@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace Smart_Battery_Charger
 {
-    internal class DataBaseMngt
+    internal class DataBaseManagement
     {
         #region publicMethods
         public static string SelectStm(ref DataTable retData, string whereStm = null) =>
@@ -13,7 +13,7 @@ namespace Smart_Battery_Charger
                 format ([colDate], 'dd MMMM yyyy') as [Date], 
                 (SELECT format (cast ([colTime] as datetime), 'hh:mm:ss tt')) as [Time], 
                 [colBatteryStatus] as [Battery Status], 
-                [colChargerStatus] as [Charger Status] 
+                trim ([colChargerStatus]) as [Charger Status] 
                 from [tblLogFile] {whereStm}", ref retData);
 
         public static string InsertStm(ref int batteryPercentage, ref string chargerStatus, ref DataTable retData) =>

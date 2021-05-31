@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.Drawing;
+using System.Management;
 using System.Windows.Forms;
 
 namespace Smart_Battery_Charger
@@ -54,10 +55,9 @@ namespace Smart_Battery_Charger
         }
         #endregion
 
-        #region dealWithTextboxes
+        #region textboxes
         //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
         private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) => FillTextBoxes(e.RowIndex);
-        private void Dgv_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e) => FillTextBoxes(e.RowIndex);
 
         //fill textboxes according to row index passed
         private void FillTextBoxes(int rowIndex)
@@ -80,17 +80,16 @@ namespace Smart_Battery_Charger
             txtBatteryPercentage.Text = _dataTbl.Rows[rowIndex][3].ToString();
             txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
         }
-
         #endregion
 
-        #region dealWithDatabase
+        #region database
         //get data from database
         private void FrmMain_Load(object sender, EventArgs e)
         {
             //raising SystemEvents_PowerModeChanged event at the begin of application
             SystemEvents_PowerModeChanged(this, null);
             //select * from database
-            var errMsg = DataBaseMngt.SelectStm(ref _dataTbl);
+            var errMsg = DataBaseManagement.SelectStm(ref _dataTbl);
 
             if (errMsg != null)
                 MessageBox.Show(errMsg);
@@ -112,30 +111,31 @@ namespace Smart_Battery_Charger
             if ((MessageBox.Show(@$"Are you sure that you want to delete record number: {delIndex} ?", @"Delete Confirmation",
                 MessageBoxButtons.YesNo)) != DialogResult.Yes) return;
 
-            var errMsg = DataBaseMngt.DeleteStm(delIndex, ref _dataTbl);
+            var errMsg = DataBaseManagement.DeleteStm(delIndex, ref _dataTbl);
 
             if (errMsg != null)
                 MessageBox.Show(errMsg);
             else
             {
                 //update Dgv
-                DataBaseMngt.SelectStm(ref _dataTbl);
+                DataBaseManagement.SelectStm(ref _dataTbl);
 
                 MessageBox.Show($@"Delete Record at index: {delIndex} was done successfully", @"Process Completed Successfully");
             }
         }
 
+        //filter records using dates
         private void btnFilter_Click(object sender, EventArgs e)
         {
             var whereStm = @$"Where colDate between '{dtpFrom.Value:dd MMMM yyyy}' and '{dtpTo.Value:dd MMMM yyyy}'";
 
             //correct condition
             if (dtpFrom.Value < dtpTo.Value)
-                DataBaseMngt.SelectStm(ref _dataTbl, whereStm);
+                DataBaseManagement.SelectStm(ref _dataTbl, whereStm);
 
             //error dates
             else
-                DataBaseMngt.SelectStm(ref _dataTbl);
+                DataBaseManagement.SelectStm(ref _dataTbl);
         }
         #endregion
 
@@ -156,5 +156,56 @@ namespace Smart_Battery_Charger
         private void notifyIcon_BalloonTipClicked(object sender, EventArgs e) => Visible = true;
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e) => Visible = true;
         #endregion
+
+        private void btnMachineInfo_Click(object sender, EventArgs e)
+        {
+            var osDetails = new ManagementObjectSearcher(new SelectQuery("Win32_Processor"));
+            var osDetailsCollection = osDetails.Get();
+            var strMsg = string.Empty;
+
+            foreach (var info in osDetailsCollection)
+            {
+                strMsg += "System Name".PadRight(22);
+                strMsg += $": {info["SystemName"]}\n";
+
+                strMsg += "Name".PadRight(27);
+                strMsg += $": {info["Name"]}\n";
+
+                strMsg += "Caption".PadRight(27);
+                strMsg += $": {info["Caption"]}\n";
+
+                strMsg += "Number of Cores".PadRight(21);
+                strMsg += $": {info["NumberOfCores"]}\n";
+
+                strMsg += "Number of Threads".PadRight(20);
+                strMsg += $": {info["NumberOfLogicalProcessors"]}\n";
+
+                strMsg += "Data Width".PadRight(25);
+                strMsg += $": {(ushort)info["DataWidth"]}\n";
+
+                strMsg += "Current Clock Speed".PadRight(20);
+                strMsg += $": {info["CurrentClockSpeed"]}\n";
+
+                strMsg += "Max Clock Speed".PadRight(21);
+                strMsg += $": {info["MaxClockSpeed"]}\n";
+
+                strMsg += "Current Voltage".PadRight(23);
+                strMsg += $": {(ushort) info["CurrentVoltage"]}\n";
+
+                strMsg += "Description".PadRight(26);
+                strMsg += $": {info["Description"]}\n";
+
+                strMsg += "L2 Cache Size".PadRight(24);
+                strMsg += $": {info["L2CacheSize"]}\n";
+
+                strMsg += "L3 Cache Size".PadRight(24);
+                strMsg += $": {info["L3CacheSize"]}\n";
+
+                strMsg += "Manufacturer".PadRight(23);
+                strMsg += $": {info["Manufacturer"]}";
+            }
+
+            MessageBox.Show(strMsg);
+        }
     }
 }
