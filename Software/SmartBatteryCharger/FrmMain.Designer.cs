@@ -39,6 +39,10 @@ namespace Smart_Battery_Charger
             this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.pbHD = new System.Windows.Forms.ProgressBar();
+            this.pbRam = new System.Windows.Forms.ProgressBar();
+            this.pbGpu = new System.Windows.Forms.ProgressBar();
+            this.pbCpu = new System.Windows.Forms.ProgressBar();
             this.btnMinimize = new System.Windows.Forms.Button();
             this.pnlFilter = new System.Windows.Forms.Panel();
             this.btnFilter = new System.Windows.Forms.Button();
@@ -50,6 +54,14 @@ namespace Smart_Battery_Charger
             this.lblBatteryNow = new System.Windows.Forms.Label();
             this.lblChargerNow = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.lblHDPercent = new System.Windows.Forms.Label();
+            this.lblGpuPercent = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.lblRamPercent = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.lblCpuPercent = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.btnDelLog = new System.Windows.Forms.Button();
             this.Dgv = new System.Windows.Forms.DataGridView();
@@ -64,16 +76,12 @@ namespace Smart_Battery_Charger
             this.txtBatteryPercentage = new System.Windows.Forms.TextBox();
             this.txtDate = new System.Windows.Forms.TextBox();
             this.txtTime = new System.Windows.Forms.TextBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.pnlMachineInfo = new System.Windows.Forms.Panel();
-            this.btnMachineInfo = new System.Windows.Forms.Button();
+            this.timerUpdateUsage = new System.Windows.Forms.Timer(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.pnlFilter.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).BeginInit();
             this.pnlTb.SuspendLayout();
-            this.tabPage2.SuspendLayout();
-            this.pnlMachineInfo.SuspendLayout();
             this.SuspendLayout();
             // 
             // notifyIcon
@@ -110,7 +118,6 @@ namespace Smart_Battery_Charger
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -119,11 +126,23 @@ namespace Smart_Battery_Charger
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.pbHD);
+            this.tabPage1.Controls.Add(this.pbRam);
+            this.tabPage1.Controls.Add(this.pbGpu);
+            this.tabPage1.Controls.Add(this.pbCpu);
             this.tabPage1.Controls.Add(this.btnMinimize);
             this.tabPage1.Controls.Add(this.pnlFilter);
             this.tabPage1.Controls.Add(this.lblBatteryNow);
             this.tabPage1.Controls.Add(this.lblChargerNow);
             this.tabPage1.Controls.Add(this.label7);
+            this.tabPage1.Controls.Add(this.lblHDPercent);
+            this.tabPage1.Controls.Add(this.lblGpuPercent);
+            this.tabPage1.Controls.Add(this.label14);
+            this.tabPage1.Controls.Add(this.lblRamPercent);
+            this.tabPage1.Controls.Add(this.label13);
+            this.tabPage1.Controls.Add(this.lblCpuPercent);
+            this.tabPage1.Controls.Add(this.label12);
+            this.tabPage1.Controls.Add(this.label11);
             this.tabPage1.Controls.Add(this.label6);
             this.tabPage1.Controls.Add(this.btnDelLog);
             this.tabPage1.Controls.Add(this.Dgv);
@@ -136,10 +155,38 @@ namespace Smart_Battery_Charger
             this.tabPage1.Text = "Battery Monitor";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // pbHD
+            // 
+            this.pbHD.Location = new System.Drawing.Point(1374, 192);
+            this.pbHD.Name = "pbHD";
+            this.pbHD.Size = new System.Drawing.Size(261, 37);
+            this.pbHD.TabIndex = 16;
+            // 
+            // pbRam
+            // 
+            this.pbRam.Location = new System.Drawing.Point(1374, 149);
+            this.pbRam.Name = "pbRam";
+            this.pbRam.Size = new System.Drawing.Size(261, 37);
+            this.pbRam.TabIndex = 16;
+            // 
+            // pbGpu
+            // 
+            this.pbGpu.Location = new System.Drawing.Point(1374, 107);
+            this.pbGpu.Name = "pbGpu";
+            this.pbGpu.Size = new System.Drawing.Size(261, 37);
+            this.pbGpu.TabIndex = 16;
+            // 
+            // pbCpu
+            // 
+            this.pbCpu.Location = new System.Drawing.Point(1374, 63);
+            this.pbCpu.Name = "pbCpu";
+            this.pbCpu.Size = new System.Drawing.Size(261, 37);
+            this.pbCpu.TabIndex = 16;
+            // 
             // btnMinimize
             // 
             this.btnMinimize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnMinimize.Location = new System.Drawing.Point(526, 386);
+            this.btnMinimize.Location = new System.Drawing.Point(1077, 377);
             this.btnMinimize.Name = "btnMinimize";
             this.btnMinimize.Size = new System.Drawing.Size(168, 72);
             this.btnMinimize.TabIndex = 15;
@@ -155,9 +202,9 @@ namespace Smart_Battery_Charger
             this.pnlFilter.Controls.Add(this.label10);
             this.pnlFilter.Controls.Add(this.label8);
             this.pnlFilter.Controls.Add(this.label9);
-            this.pnlFilter.Location = new System.Drawing.Point(1252, 31);
+            this.pnlFilter.Location = new System.Drawing.Point(3, 238);
             this.pnlFilter.Name = "pnlFilter";
-            this.pnlFilter.Size = new System.Drawing.Size(478, 211);
+            this.pnlFilter.Size = new System.Drawing.Size(483, 211);
             this.pnlFilter.TabIndex = 14;
             // 
             // btnFilter
@@ -222,7 +269,7 @@ namespace Smart_Battery_Charger
             // 
             this.lblBatteryNow.AutoSize = true;
             this.lblBatteryNow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.lblBatteryNow.Location = new System.Drawing.Point(1168, 430);
+            this.lblBatteryNow.Location = new System.Drawing.Point(1463, 300);
             this.lblBatteryNow.Name = "lblBatteryNow";
             this.lblBatteryNow.Size = new System.Drawing.Size(36, 28);
             this.lblBatteryNow.TabIndex = 12;
@@ -231,7 +278,7 @@ namespace Smart_Battery_Charger
             // lblChargerNow
             // 
             this.lblChargerNow.AutoSize = true;
-            this.lblChargerNow.Location = new System.Drawing.Point(1168, 386);
+            this.lblChargerNow.Location = new System.Drawing.Point(1463, 256);
             this.lblChargerNow.Name = "lblChargerNow";
             this.lblChargerNow.Size = new System.Drawing.Size(31, 28);
             this.lblChargerNow.TabIndex = 13;
@@ -240,16 +287,88 @@ namespace Smart_Battery_Charger
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(968, 430);
+            this.label7.Location = new System.Drawing.Point(1263, 300);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(194, 28);
             this.label7.TabIndex = 10;
             this.label7.Text = "Battery Percentage";
             // 
+            // lblHDPercent
+            // 
+            this.lblHDPercent.AutoSize = true;
+            this.lblHDPercent.Location = new System.Drawing.Point(1639, 192);
+            this.lblHDPercent.Name = "lblHDPercent";
+            this.lblHDPercent.Size = new System.Drawing.Size(72, 28);
+            this.lblHDPercent.TabIndex = 11;
+            this.lblHDPercent.Text = "HDPer";
+            // 
+            // lblGpuPercent
+            // 
+            this.lblGpuPercent.AutoSize = true;
+            this.lblGpuPercent.Location = new System.Drawing.Point(1639, 107);
+            this.lblGpuPercent.Name = "lblGpuPercent";
+            this.lblGpuPercent.Size = new System.Drawing.Size(80, 28);
+            this.lblGpuPercent.TabIndex = 11;
+            this.lblGpuPercent.Text = "GpuPer";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(1263, 192);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(105, 28);
+            this.label14.TabIndex = 11;
+            this.label14.Text = "Hard Disk";
+            // 
+            // lblRamPercent
+            // 
+            this.lblRamPercent.AutoSize = true;
+            this.lblRamPercent.Location = new System.Drawing.Point(1639, 149);
+            this.lblRamPercent.Name = "lblRamPercent";
+            this.lblRamPercent.Size = new System.Drawing.Size(84, 28);
+            this.lblRamPercent.TabIndex = 11;
+            this.lblRamPercent.Text = "RamPer";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(1263, 107);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(52, 28);
+            this.label13.TabIndex = 11;
+            this.label13.Text = "GPU";
+            // 
+            // lblCpuPercent
+            // 
+            this.lblCpuPercent.AutoSize = true;
+            this.lblCpuPercent.Location = new System.Drawing.Point(1639, 63);
+            this.lblCpuPercent.Name = "lblCpuPercent";
+            this.lblCpuPercent.Size = new System.Drawing.Size(78, 28);
+            this.lblCpuPercent.TabIndex = 11;
+            this.lblCpuPercent.Text = "CpuPer";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(1263, 149);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(58, 28);
+            this.label12.TabIndex = 11;
+            this.label12.Text = "RAM";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(1263, 63);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(50, 28);
+            this.label11.TabIndex = 11;
+            this.label11.Text = "CPU";
+            // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(968, 386);
+            this.label6.Location = new System.Drawing.Point(1263, 256);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(151, 28);
             this.label6.TabIndex = 11;
@@ -258,7 +377,7 @@ namespace Smart_Battery_Charger
             // btnDelLog
             // 
             this.btnDelLog.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.btnDelLog.Location = new System.Drawing.Point(755, 386);
+            this.btnDelLog.Location = new System.Drawing.Point(747, 377);
             this.btnDelLog.Name = "btnDelLog";
             this.btnDelLog.Size = new System.Drawing.Size(168, 72);
             this.btnDelLog.TabIndex = 9;
@@ -285,7 +404,7 @@ namespace Smart_Battery_Charger
             this.Dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.InactiveCaption;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -314,144 +433,120 @@ namespace Smart_Battery_Charger
             this.pnlTb.Controls.Add(this.txtBatteryPercentage);
             this.pnlTb.Controls.Add(this.txtDate);
             this.pnlTb.Controls.Add(this.txtTime);
-            this.pnlTb.Location = new System.Drawing.Point(0, 30);
+            this.pnlTb.Location = new System.Drawing.Point(3, 30);
             this.pnlTb.Name = "pnlTb";
-            this.pnlTb.Size = new System.Drawing.Size(483, 338);
+            this.pnlTb.Size = new System.Drawing.Size(483, 202);
             this.pnlTb.TabIndex = 7;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(18, 278);
+            this.label5.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label5.Location = new System.Drawing.Point(14, 153);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(170, 31);
+            this.label5.Size = new System.Drawing.Size(145, 22);
             this.label5.TabIndex = 1;
             this.label5.Text = "Charger Status";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(18, 218);
+            this.label4.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label4.Location = new System.Drawing.Point(14, 118);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(217, 31);
+            this.label4.Size = new System.Drawing.Size(185, 22);
             this.label4.TabIndex = 1;
             this.label4.Text = "Battery Percentage";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(18, 98);
+            this.label2.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label2.Location = new System.Drawing.Point(14, 48);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(64, 31);
+            this.label2.Size = new System.Drawing.Size(53, 22);
             this.label2.TabIndex = 1;
             this.label2.Text = "Date";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(18, 158);
+            this.label3.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label3.Location = new System.Drawing.Point(14, 83);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 31);
+            this.label3.Size = new System.Drawing.Size(54, 22);
             this.label3.TabIndex = 1;
             this.label3.Text = "Time";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(18, 38);
+            this.label1.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(14, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(74, 31);
+            this.label1.Size = new System.Drawing.Size(64, 22);
             this.label1.TabIndex = 1;
             this.label1.Text = "Index";
             // 
             // txtChargerStatus
             // 
-            this.txtChargerStatus.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.txtChargerStatus.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtChargerStatus.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtChargerStatus.Location = new System.Drawing.Point(238, 278);
+            this.txtChargerStatus.Location = new System.Drawing.Point(234, 153);
             this.txtChargerStatus.Name = "txtChargerStatus";
             this.txtChargerStatus.ReadOnly = true;
-            this.txtChargerStatus.Size = new System.Drawing.Size(226, 30);
+            this.txtChargerStatus.Size = new System.Drawing.Size(226, 29);
             this.txtChargerStatus.TabIndex = 0;
             this.txtChargerStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtIndex
             // 
-            this.txtIndex.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.txtIndex.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtIndex.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtIndex.Location = new System.Drawing.Point(238, 38);
+            this.txtIndex.Location = new System.Drawing.Point(234, 13);
             this.txtIndex.Name = "txtIndex";
             this.txtIndex.ReadOnly = true;
-            this.txtIndex.Size = new System.Drawing.Size(226, 30);
+            this.txtIndex.Size = new System.Drawing.Size(226, 29);
             this.txtIndex.TabIndex = 0;
             this.txtIndex.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtBatteryPercentage
             // 
-            this.txtBatteryPercentage.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.txtBatteryPercentage.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtBatteryPercentage.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtBatteryPercentage.Location = new System.Drawing.Point(238, 218);
+            this.txtBatteryPercentage.Location = new System.Drawing.Point(234, 118);
             this.txtBatteryPercentage.Name = "txtBatteryPercentage";
             this.txtBatteryPercentage.ReadOnly = true;
-            this.txtBatteryPercentage.Size = new System.Drawing.Size(226, 30);
+            this.txtBatteryPercentage.Size = new System.Drawing.Size(226, 29);
             this.txtBatteryPercentage.TabIndex = 0;
             this.txtBatteryPercentage.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtDate
             // 
-            this.txtDate.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.txtDate.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtDate.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtDate.Location = new System.Drawing.Point(238, 98);
+            this.txtDate.Location = new System.Drawing.Point(234, 48);
             this.txtDate.Name = "txtDate";
             this.txtDate.ReadOnly = true;
-            this.txtDate.Size = new System.Drawing.Size(226, 30);
+            this.txtDate.Size = new System.Drawing.Size(226, 29);
             this.txtDate.TabIndex = 0;
             this.txtDate.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtTime
             // 
-            this.txtTime.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.txtTime.Font = new System.Drawing.Font("Tahoma", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtTime.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtTime.Location = new System.Drawing.Point(238, 158);
+            this.txtTime.Location = new System.Drawing.Point(234, 83);
             this.txtTime.Name = "txtTime";
             this.txtTime.ReadOnly = true;
-            this.txtTime.Size = new System.Drawing.Size(226, 30);
+            this.txtTime.Size = new System.Drawing.Size(226, 29);
             this.txtTime.TabIndex = 0;
             this.txtTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // tabPage2
+            // timerUpdateUsage
             // 
-            this.tabPage2.Controls.Add(this.pnlMachineInfo);
-            this.tabPage2.Location = new System.Drawing.Point(4, 37);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1747, 477);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Machine Info";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // pnlMachineInfo
-            // 
-            this.pnlMachineInfo.Controls.Add(this.btnMachineInfo);
-            this.pnlMachineInfo.Location = new System.Drawing.Point(6, 6);
-            this.pnlMachineInfo.Name = "pnlMachineInfo";
-            this.pnlMachineInfo.Size = new System.Drawing.Size(718, 468);
-            this.pnlMachineInfo.TabIndex = 0;
-            // 
-            // btnMachineInfo
-            // 
-            this.btnMachineInfo.Location = new System.Drawing.Point(200, 385);
-            this.btnMachineInfo.Name = "btnMachineInfo";
-            this.btnMachineInfo.Size = new System.Drawing.Size(298, 65);
-            this.btnMachineInfo.TabIndex = 2;
-            this.btnMachineInfo.Text = "Get Info About Machine";
-            this.btnMachineInfo.UseVisualStyleBackColor = true;
-            this.btnMachineInfo.Click += new System.EventHandler(this.btnMachineInfo_Click);
+            this.timerUpdateUsage.Interval = 1000;
+            this.timerUpdateUsage.Tick += new System.EventHandler(this.timerUpdateUsage_Tick);
             // 
             // FrmMain
             // 
@@ -477,8 +572,6 @@ namespace Smart_Battery_Charger
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).EndInit();
             this.pnlTb.ResumeLayout(false);
             this.pnlTb.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.pnlMachineInfo.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -515,9 +608,19 @@ namespace Smart_Battery_Charger
         private System.Windows.Forms.TextBox txtBatteryPercentage;
         private System.Windows.Forms.TextBox txtDate;
         private System.Windows.Forms.TextBox txtTime;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.Panel pnlMachineInfo;
-        private System.Windows.Forms.Button btnMachineInfo;
+        private System.Windows.Forms.Timer timerUpdateUsage;
+        private System.Windows.Forms.ProgressBar pbHD;
+        private System.Windows.Forms.ProgressBar pbRam;
+        private System.Windows.Forms.ProgressBar pbGpu;
+        private System.Windows.Forms.ProgressBar pbCpu;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label lblHDPercent;
+        private System.Windows.Forms.Label lblGpuPercent;
+        private System.Windows.Forms.Label lblRamPercent;
+        private System.Windows.Forms.Label lblCpuPercent;
     }
 }
 

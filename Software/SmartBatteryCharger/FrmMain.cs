@@ -1,8 +1,8 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Data;
 using System.Drawing;
-using System.Management;
+using Microsoft.Win32;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Smart_Battery_Charger
@@ -10,6 +10,7 @@ namespace Smart_Battery_Charger
     internal partial class FrmMain : Form
     {
         #region initializer
+
         //initialize data table to be data source for data grid view
         private DataTable _dataTbl = new();
 
@@ -19,29 +20,51 @@ namespace Smart_Battery_Charger
         //initialize BatteryMonitor to provide streaming battery percentage
         private readonly BatteryMonitor _batteryMonitor = new();
 
+        //declare PerformanceCounter object
+        private readonly PerformanceCounter _cpuCounter;
+        private readonly PerformanceCounter _ramCounter;
+        private readonly PerformanceCounter _hdCounter;
+
+
+        //get total amount of ram in machine
+        //1,000,000 = 1000 * 1000 ( Byte => M.Byte )
+        private readonly ulong _ramTotalSize =
+            new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / (ulong)1e6;
+
         //constructor
         public FrmMain()
         {
             InitializeComponent();
 
             //get battery percent at initialization time
-            lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
+            lblBatteryNow.Text = (int) (_batteryInfo.BatteryLifePercent * 100) + @" %";
+
+            //enable timer that responsible for update machine info part
+            timerUpdateUsage.Enabled = true;
 
             //add SystemEvents_PowerModeChanged event using Microsoft.Win32 API
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
             //add GetBatteryPercentage to PercentChanged event
             _batteryMonitor.PercentChanged += GetBatteryPercentage;
+
+            //initialize PerformanceCounter object
+            _cpuCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total", true);
+            _ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
+            _hdCounter = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total");
         }
+
         #endregion
 
+
         #region getBatteryPercentage
+
         //get battery percentage
         private void GetBatteryPercentage(object source, EventArgs e)
         {
             Invoke(new MethodInvoker(delegate
             {
-                lblBatteryNow.Text = (int)(_batteryInfo.BatteryLifePercent * 100) + @" %";
+                lblBatteryNow.Text = (int) (_batteryInfo.BatteryLifePercent * 100) + @" %";
             }));
         }
 
@@ -53,9 +76,12 @@ namespace Smart_Battery_Charger
             //change lblChargerNow label according to charger status
             lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
         }
+
         #endregion
 
+
         #region textboxes
+
         //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
         private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) => FillTextBoxes(e.RowIndex);
 
@@ -80,9 +106,12 @@ namespace Smart_Battery_Charger
             txtBatteryPercentage.Text = _dataTbl.Rows[rowIndex][3].ToString();
             txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
         }
+
         #endregion
 
+
         #region database
+
         //get data from database
         private void FrmMain_Load(object sender, EventArgs e)
         {
@@ -108,7 +137,8 @@ namespace Smart_Battery_Charger
             var delIndex = int.Parse(txtIndex.Text);
 
             //check message before delete
-            if ((MessageBox.Show(@$"Are you sure that you want to delete record number: {delIndex} ?", @"Delete Confirmation",
+            if ((MessageBox.Show(@$"Are you sure that you want to delete record number: {delIndex} ?",
+                @"Delete Confirmation",
                 MessageBoxButtons.YesNo)) != DialogResult.Yes) return;
 
             var errMsg = DataBaseManagement.DeleteStm(delIndex, ref _dataTbl);
@@ -120,7 +150,8 @@ namespace Smart_Battery_Charger
                 //update Dgv
                 DataBaseManagement.SelectStm(ref _dataTbl);
 
-                MessageBox.Show($@"Delete Record at index: {delIndex} was done successfully", @"Process Completed Successfully");
+                MessageBox.Show($@"Delete Record at index: {delIndex} was done successfully",
+                    @"Process Completed Successfully");
             }
         }
 
@@ -137,12 +168,18 @@ namespace Smart_Battery_Charger
             else
                 DataBaseManagement.SelectStm(ref _dataTbl);
         }
+
         #endregion
 
+
         #region NotifyIcon
+
         //minimize form from btnMinimize button
         private void btnMinimize_Click(object sender, EventArgs e)
         {
+            //stop timer to reduce overhead
+            timerUpdateUsage.Enabled = false;
+
             Hide();
             notifyIcon.ShowBalloonTip(
                 3000,
@@ -153,59 +190,46 @@ namespace Smart_Battery_Charger
         }
 
         //maximize form from 
-        private void notifyIcon_BalloonTipClicked(object sender, EventArgs e) => Visible = true;
-        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e) => Visible = true;
+        private void notifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            Visible = true;
+            timerUpdateUsage.Enabled = true;
+        }
+
+        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            Visible = true;
+            timerUpdateUsage.Enabled = true;
+        }
+
         #endregion
 
-        private void btnMachineInfo_Click(object sender, EventArgs e)
+
+        #region resourceUsage
+
+        private void timerUpdateUsage_Tick(object sender, EventArgs e)
         {
-            var osDetails = new ManagementObjectSearcher(new SelectQuery("Win32_Processor"));
-            var osDetailsCollection = osDetails.Get();
-            var strMsg = string.Empty;
+            var processorUsed = (int) _cpuCounter.NextValue();
 
-            foreach (var info in osDetailsCollection)
-            {
-                strMsg += "System Name".PadRight(22);
-                strMsg += $": {info["SystemName"]}\n";
+            var ramUsed = _ramTotalSize - _ramCounter.NextValue();
+            var ramPercentUsed = ramUsed / _ramTotalSize * 100;
 
-                strMsg += "Name".PadRight(27);
-                strMsg += $": {info["Name"]}\n";
+            var hdPercentUsed = (int) Math.Ceiling(_hdCounter.NextValue());
 
-                strMsg += "Caption".PadRight(27);
-                strMsg += $": {info["Caption"]}\n";
+            pbCpu.Value = processorUsed;
+            lblCpuPercent.Text = @$"{processorUsed} %";
+            
+            pbRam.Value = (int)ramPercentUsed;
+            lblRamPercent.Text = @$"{(int)ramPercentUsed} %";
 
-                strMsg += "Number of Cores".PadRight(21);
-                strMsg += $": {info["NumberOfCores"]}\n";
+            pbHD.Value = hdPercentUsed;
+            lblHDPercent.Text = @$"{hdPercentUsed} %";
 
-                strMsg += "Number of Threads".PadRight(20);
-                strMsg += $": {info["NumberOfLogicalProcessors"]}\n";
 
-                strMsg += "Data Width".PadRight(25);
-                strMsg += $": {(ushort)info["DataWidth"]}\n";
 
-                strMsg += "Current Clock Speed".PadRight(20);
-                strMsg += $": {info["CurrentClockSpeed"]}\n";
 
-                strMsg += "Max Clock Speed".PadRight(21);
-                strMsg += $": {info["MaxClockSpeed"]}\n";
-
-                strMsg += "Current Voltage".PadRight(23);
-                strMsg += $": {(ushort) info["CurrentVoltage"]}\n";
-
-                strMsg += "Description".PadRight(26);
-                strMsg += $": {info["Description"]}\n";
-
-                strMsg += "L2 Cache Size".PadRight(24);
-                strMsg += $": {info["L2CacheSize"]}\n";
-
-                strMsg += "L3 Cache Size".PadRight(24);
-                strMsg += $": {info["L3CacheSize"]}\n";
-
-                strMsg += "Manufacturer".PadRight(23);
-                strMsg += $": {info["Manufacturer"]}";
-            }
-
-            MessageBox.Show(strMsg);
         }
+
+        #endregion
     }
 }

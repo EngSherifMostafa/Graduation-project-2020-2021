@@ -7,6 +7,7 @@ namespace Smart_Battery_Charger
     internal class DataBaseManagement
     {
         #region publicMethods
+
         public static string SelectStm(ref DataTable retData, string whereStm = null) =>
             ExecSqlCmd(
                 @$"Select colIndex as [Index], 
@@ -25,9 +26,12 @@ namespace Smart_Battery_Charger
 
         public static string DeleteStm(int recIndex, ref DataTable retData) =>
             ExecSqlCmd($"Delete from tblLogFile where colIndex = {recIndex}", ref retData);
+        
         #endregion
 
+
         #region privateMethod
+
         private static string ExecSqlCmd(string sqlStm, ref DataTable retData)
         {
             //clear data table to refill it
@@ -61,6 +65,7 @@ namespace Smart_Battery_Charger
                 return e.Message;
             }
         }
+
         #endregion
     }
 }

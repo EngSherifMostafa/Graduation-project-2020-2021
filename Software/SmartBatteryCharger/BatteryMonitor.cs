@@ -7,12 +7,16 @@ namespace Smart_Battery_Charger
     internal class BatteryMonitor
     {
         #region initializer
+
         // 1- define delegate or use EventHandler<Generic>
         // 2- define event on delegate
         public event EventHandler PercentChanged;
+        
         #endregion
 
+
         #region eventHandler
+        
         //constructor
         public BatteryMonitor()
         {
@@ -39,9 +43,10 @@ namespace Smart_Battery_Charger
 
         // 3- raise event
         protected virtual void OnPercentChanged() => PercentChanged?.Invoke(this, EventArgs.Empty);
+        
         #endregion
 
-
+        
         //private void SendSignal(string command, int timeInSecond)
         //{
 
