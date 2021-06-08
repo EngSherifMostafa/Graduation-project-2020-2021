@@ -4,14 +4,14 @@ using System.Windows.Forms;
 
 namespace Smart_Battery_Charger
 {
-    internal class BatteryMonitor
+    public class BatteryMonitor
     {
         #region initializer
 
         // 1- define delegate or use EventHandler<Generic>
         // 2- define event on delegate
         public event EventHandler PercentChanged;
-        
+
         #endregion
 
 
@@ -39,6 +39,7 @@ namespace Smart_Battery_Charger
                 OnPercentChanged();
             }
             goto tryAgain;
+            // ReSharper disable once FunctionNeverReturns
         }
 
         // 3- raise event

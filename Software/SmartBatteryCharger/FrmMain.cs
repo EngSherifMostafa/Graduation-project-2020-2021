@@ -2,7 +2,6 @@
 using System.Data;
 using System.Drawing;
 using Microsoft.Win32;
-using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Smart_Battery_Charger
@@ -14,30 +13,17 @@ namespace Smart_Battery_Charger
         //initialize data table to be data source for data grid view
         private DataTable _dataTbl = new();
 
-        //initialize PowerStatus to provide info about battery and charger
-        private readonly PowerStatus _batteryInfo = SystemInformation.PowerStatus;
-
-        //initialize BatteryMonitor to provide streaming battery percentage
-        private readonly BatteryMonitor _batteryMonitor = new();
-
-        //declare PerformanceCounter object
-        private readonly PerformanceCounter _cpuCounter;
-        private readonly PerformanceCounter _ramCounter;
-        private readonly PerformanceCounter _hdCounter;
-
-
-        //get total amount of ram in machine
-        //1,000,000 = 1000 * 1000 ( Byte => M.Byte )
-        private readonly ulong _ramTotalSize =
-            new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / (ulong)1e6;
+        private readonly ResourcesMonitor _resourcesMonitor;
 
         //constructor
         public FrmMain()
         {
             InitializeComponent();
 
+            _resourcesMonitor = new ResourcesMonitor();
+
             //get battery percent at initialization time
-            lblBatteryNow.Text = (int) (_batteryInfo.BatteryLifePercent * 100) + @" %";
+            lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
 
             //enable timer that responsible for update machine info part
             timerUpdateUsage.Enabled = true;
@@ -46,12 +32,7 @@ namespace Smart_Battery_Charger
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
             //add GetBatteryPercentage to PercentChanged event
-            _batteryMonitor.PercentChanged += GetBatteryPercentage;
-
-            //initialize PerformanceCounter object
-            _cpuCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total", true);
-            _ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
-            _hdCounter = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total");
+            _resourcesMonitor.BatteryMonitor.PercentChanged += GetBatteryPercentage;
         }
 
         #endregion
@@ -64,14 +45,14 @@ namespace Smart_Battery_Charger
         {
             Invoke(new MethodInvoker(delegate
             {
-                lblBatteryNow.Text = (int) (_batteryInfo.BatteryLifePercent * 100) + @" %";
+                lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
             }));
         }
 
         //PowerModeChanged event
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            lblChargerNow.Text = _batteryInfo.PowerLineStatus.ToString();
+            lblChargerNow.Text = _resourcesMonitor.ChargerStatus;
 
             //change lblChargerNow label according to charger status
             lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
@@ -209,25 +190,22 @@ namespace Smart_Battery_Charger
 
         private void timerUpdateUsage_Tick(object sender, EventArgs e)
         {
-            var processorUsed = (int) _cpuCounter.NextValue();
+            try
+            {
+                pbCpu.Value = _resourcesMonitor.CpuMonitor;
+                lblCpuPercent.Text = pbCpu.Value + @" %";
 
-            var ramUsed = _ramTotalSize - _ramCounter.NextValue();
-            var ramPercentUsed = ramUsed / _ramTotalSize * 100;
+                pbRam.Value = _resourcesMonitor.RamMonitor;
+                lblRamPercent.Text = pbRam.Value + @" %";
 
-            var hdPercentUsed = (int) Math.Ceiling(_hdCounter.NextValue());
-
-            pbCpu.Value = processorUsed;
-            lblCpuPercent.Text = @$"{processorUsed} %";
-            
-            pbRam.Value = (int)ramPercentUsed;
-            lblRamPercent.Text = @$"{(int)ramPercentUsed} %";
-
-            pbHD.Value = hdPercentUsed;
-            lblHDPercent.Text = @$"{hdPercentUsed} %";
-
-
-
-
+                pbHD.Value = _resourcesMonitor.HdMonitor;
+                lblHDPercent.Text = pbHD.Value + @" %";
+            }
+            //error in calculation from performance system
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         #endregion
