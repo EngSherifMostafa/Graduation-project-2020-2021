@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Data;
 using System.Drawing;
 using Microsoft.Win32;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualBasic;
 
 namespace Smart_Battery_Charger
 {
@@ -10,8 +12,11 @@ namespace Smart_Battery_Charger
     {
         #region initializer
 
+        //initialize BindingSource to Refresh Dgv.DataSource
+        private readonly BindingSource _bindingSource;
+
         //initialize data table to be data source for data grid view
-        private DataTable _dataTbl = new();
+        private readonly List<RecordInfo> _recordsList;
 
         private readonly ResourcesMonitor _resourcesMonitor;
 
@@ -19,6 +24,10 @@ namespace Smart_Battery_Charger
         public FrmMain()
         {
             InitializeComponent();
+
+            _bindingSource = new BindingSource();
+
+            _recordsList = new List<RecordInfo>();
 
             _resourcesMonitor = new ResourcesMonitor();
 
@@ -33,21 +42,22 @@ namespace Smart_Battery_Charger
 
             //add GetBatteryPercentage to PercentChanged event
             _resourcesMonitor.BatteryMonitor.PercentChanged += GetBatteryPercentage;
+
+            //add InsertAtChange to PercentChanged event
+            _resourcesMonitor.BatteryMonitor.PercentChanged += InsertAtChange;
         }
 
         #endregion
 
 
-        #region getBatteryPercentage
+        #region getInsertBatteryPercentage
 
         //get battery percentage
-        private void GetBatteryPercentage(object source, EventArgs e)
-        {
+        private void GetBatteryPercentage(object source, EventArgs e) =>
             Invoke(new MethodInvoker(delegate
             {
                 lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
             }));
-        }
 
         //PowerModeChanged event
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -58,19 +68,36 @@ namespace Smart_Battery_Charger
             lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
         }
 
+        //inserting record when battery change by 1%
+        private void InsertAtChange(object source, EventArgs e)
+        {
+            var errMsg = DataBaseManagement.InsertStm(_resourcesMonitor.BatteryPercent, _resourcesMonitor.ChargerStatus,
+                _resourcesMonitor.CpuMonitor, _resourcesMonitor.RamMonitor, _resourcesMonitor.HdMonitor);
+
+            if (errMsg != string.Empty)
+                MessageBox.Show(errMsg);
+            else
+            {
+                //update Dgv
+                DataBaseManagement.SelectStm(_recordsList);
+                Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
+            }
+        }
+
         #endregion
 
 
         #region textboxes
 
         //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
-        private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) => FillTextBoxes(e.RowIndex);
+        private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) =>
+            Invoke(new Action<int>(FillTextBoxes), e.RowIndex);
 
         //fill textboxes according to row index passed
         private void FillTextBoxes(int rowIndex)
         {
             //clear text boxes when table has zero rows
-            if (_dataTbl.Rows.Count == 0)
+            if (_recordsList.Count == 0)
             {
                 txtIndex.Clear();
                 txtDate.Clear();
@@ -80,12 +107,11 @@ namespace Smart_Battery_Charger
                 return;
             }
 
-            txtIndex.Text = _dataTbl.Rows[rowIndex][0].ToString();
-            txtDate.Text = DateTime.Parse(_dataTbl.Rows[rowIndex][1].ToString() ?? string.Empty)
-                .ToString(format: "dd MMMM yyyy");
-            txtTime.Text = _dataTbl.Rows[rowIndex][2].ToString();
-            txtBatteryPercentage.Text = _dataTbl.Rows[rowIndex][3].ToString();
-            txtChargerStatus.Text = _dataTbl.Rows[rowIndex][4].ToString();
+            txtIndex.Text = _recordsList[rowIndex].Index.ToString();
+            txtDate.Text = _recordsList[rowIndex].Date;
+            txtTime.Text = _recordsList[rowIndex].Time;
+            txtBatteryPercentage.Text = _recordsList[rowIndex].BatteryPercent.ToString();
+            txtChargerStatus.Text = _recordsList[rowIndex].ChargerStatus;
         }
 
         #endregion
@@ -99,37 +125,42 @@ namespace Smart_Battery_Charger
             //raising SystemEvents_PowerModeChanged event at the begin of application
             SystemEvents_PowerModeChanged(this, null);
             //select * from database
-            var errMsg = DataBaseManagement.SelectStm(ref _dataTbl);
+            var errMsg = DataBaseManagement.SelectStm(_recordsList);
 
-            if (errMsg != null)
+            if (errMsg != string.Empty)
                 MessageBox.Show(errMsg);
 
             else
-                Dgv.DataSource = _dataTbl;
+            {
+                _bindingSource.DataSource = _recordsList;
+                Dgv.DataSource = _bindingSource;
+            }
+                
         }
 
         //delete log record
         private void btnDelLog_Click(object sender, EventArgs e)
         {
             //there is no row to delete it
-            if (_dataTbl.Rows.Count == 0)
+            if (_recordsList.Count == 0)
                 return;
 
-            var delIndex = int.Parse(txtIndex.Text);
+            var delIndex = Convert.ToInt32(txtIndex.Text);
 
             //check message before delete
             if ((MessageBox.Show(@$"Are you sure that you want to delete record number: {delIndex} ?",
                 @"Delete Confirmation",
                 MessageBoxButtons.YesNo)) != DialogResult.Yes) return;
 
-            var errMsg = DataBaseManagement.DeleteStm(delIndex, ref _dataTbl);
+            var errMsg = DataBaseManagement.DeleteStm(delIndex);
 
-            if (errMsg != null)
+            if (errMsg != string.Empty)
                 MessageBox.Show(errMsg);
             else
             {
                 //update Dgv
-                DataBaseManagement.SelectStm(ref _dataTbl);
+                DataBaseManagement.SelectStm(_recordsList);
+                Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
 
                 MessageBox.Show($@"Delete Record at index: {delIndex} was done successfully",
                     @"Process Completed Successfully");
@@ -139,15 +170,27 @@ namespace Smart_Battery_Charger
         //filter records using dates
         private void btnFilter_Click(object sender, EventArgs e)
         {
-            var whereStm = @$"Where colDate between '{dtpFrom.Value:dd MMMM yyyy}' and '{dtpTo.Value:dd MMMM yyyy}'";
+            //  1  => DateTime 1 >  DateTime 2
+            //  0  => DateTime 1 == DateTime 2
+            // -1  => DateTime 1 <  DateTime 2
+            
+            
+            //var whereStm = @$"Where colDate between '{dtpDateFrom.Value:dd MMMM yyyy}' and '{dtpDateTo.Value:dd MMMM yyyy}'";
 
-            //correct condition
-            if (dtpFrom.Value < dtpTo.Value)
-                DataBaseManagement.SelectStm(ref _dataTbl, whereStm);
+            ////correct condition
+            //if (dtpDateFrom.Value < dtpDateTo.Value)
+            //{
+            //    DataBaseManagement.SelectStm(_recordsList, whereStm);
+            //    Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
+            //}
 
-            //error dates
-            else
-                DataBaseManagement.SelectStm(ref _dataTbl);
+            ////error dates
+            //else
+            //{
+            //    //update Dgv
+            //    DataBaseManagement.SelectStm(_recordsList);
+            //    Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
+            //}
         }
 
         #endregion

@@ -5,6 +5,8 @@ namespace Smart_Battery_Charger
 {
     public record ResourcesMonitor
     {
+        #region initializer
+
         //initialize PowerStatus to provide info about battery and charger
         private readonly PowerStatus _batteryInfo;
 
@@ -31,6 +33,11 @@ namespace Smart_Battery_Charger
             _ramTotalSize = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / (ulong) 1e6;
         }
 
+        #endregion
+
+
+        #region accessors
+
         public int CpuMonitor => (int) _cpuCounter.NextValue();
         public int RamMonitor => (int) ((_ramTotalSize - _ramCounter.NextValue()) / _ramTotalSize * 100);
         //public int GpuMonitor => (int) _gpuCounter.NextValue();
@@ -40,5 +47,7 @@ namespace Smart_Battery_Charger
         public string ChargerStatus => _batteryInfo.PowerLineStatus.ToString();
 
         public BatteryMonitor BatteryMonitor { get; }
+        
+        #endregion
     }
 }

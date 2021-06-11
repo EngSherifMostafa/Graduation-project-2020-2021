@@ -44,10 +44,10 @@ namespace Smart_Battery_Charger
 
         // 3- raise event
         protected virtual void OnPercentChanged() => PercentChanged?.Invoke(this, EventArgs.Empty);
-        
+
         #endregion
 
-        
+
         //private void SendSignal(string command, int timeInSecond)
         //{
 
