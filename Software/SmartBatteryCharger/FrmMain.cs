@@ -23,11 +23,8 @@ namespace Smart_Battery_Charger
         public FrmMain()
         {
             InitializeComponent();
-
             _bindingSource = new BindingSource();
-
             _recordsList = new List<RecordInfo>();
-
             _resourcesMonitor = new ResourcesMonitor();
 
             //get battery percent at initialization time
@@ -35,7 +32,12 @@ namespace Smart_Battery_Charger
 
             //enable thread that responsible for update machine info part
             var threadUpdateResourcesUsage = new Thread(UpdateResourcesUsage)
-                {Name = "threadUpdateResourcesUsage", IsBackground = true, Priority = ThreadPriority.Lowest};
+            {
+                Name = "threadUpdateResourcesUsage",
+                IsBackground = true,
+                Priority = ThreadPriority.Lowest
+
+            };
             threadUpdateResourcesUsage.Start();
 
             //add SystemEvents_PowerModeChanged event using Microsoft.Win32 API
@@ -48,6 +50,7 @@ namespace Smart_Battery_Charger
             _resourcesMonitor.BatteryMonitor.PercentChanged += InsertAtChange;
 
             //set default values to filter combo-boxes
+
             cbxFromHour.SelectedIndex = 11;
             cbxFromMin.SelectedIndex = 0;
             cbxFromTT.SelectedIndex = 0;
@@ -73,8 +76,12 @@ namespace Smart_Battery_Charger
 
             else
             {
-                _bindingSource.DataSource = _recordsList;
-                Dgv.DataSource = _bindingSource;
+                Invoke(new MethodInvoker(delegate
+                {
+                    _bindingSource.DataSource = _recordsList;
+                    Dgv.DataSource = _bindingSource;
+                    _bindingSource.CurrencyManager.Refresh();
+                }));
             }
 
         }
@@ -82,8 +89,14 @@ namespace Smart_Battery_Charger
         //inserting record when battery change by 1%
         private void InsertAtChange(object source, EventArgs e)
         {
-            var errMsg = DataBaseManagement.InsertStm(_resourcesMonitor.BatteryPercent, _resourcesMonitor.ChargerStatus,
-                _resourcesMonitor.CpuMonitor, _resourcesMonitor.RamMonitor, _resourcesMonitor.HdMonitor);
+            var errMsg = DataBaseManagement.InsertStm
+            (
+                _resourcesMonitor.BatteryPercent,
+                _resourcesMonitor.ChargerStatus,
+                _resourcesMonitor.CpuMonitor,
+                _resourcesMonitor.RamMonitor,
+                _resourcesMonitor.HdMonitor
+            );
 
             if (errMsg != string.Empty)
                 MessageBox.Show(errMsg);
@@ -91,7 +104,12 @@ namespace Smart_Battery_Charger
             {
                 //update Dgv
                 DataBaseManagement.SelectStm(_recordsList);
-                Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
+                Invoke(new MethodInvoker(delegate
+                {
+                    _bindingSource.DataSource = _recordsList;
+                    Dgv.DataSource = _bindingSource;
+                    _bindingSource.CurrencyManager.Refresh();
+                }));
             }
         }
 
@@ -117,7 +135,12 @@ namespace Smart_Battery_Charger
             {
                 //update Dgv
                 DataBaseManagement.SelectStm(_recordsList);
-                Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
+                Invoke(new MethodInvoker(delegate
+                {
+                    _bindingSource.DataSource = _recordsList;
+                    Dgv.DataSource = _bindingSource;
+                    _bindingSource.CurrencyManager.Refresh();
+                }));
 
                 MessageBox.Show($@"Delete Record at index: {delIndex} was done successfully",
                     @"Process Completed Successfully");
@@ -142,16 +165,36 @@ namespace Smart_Battery_Charger
 
             try
             {
-                Dgv.DataSource = null;
-                _bindingSource.DataSource = dateFiltered;
-                Dgv.DataSource = _bindingSource;
-                Invoke(new Action(_bindingSource.CurrencyManager.Refresh));
+                Invoke(new MethodInvoker(delegate
+                {
+                    _bindingSource.DataSource = dateFiltered;
+                    Dgv.DataSource = _bindingSource;
+                    _bindingSource.CurrencyManager.Refresh();
+                }));
             }
             catch (Exception err)
             {
                 MessageBox.Show(err.Message);
                 // ignored
             }
+        }
+
+        private void btnClearFilter_Click(object sender, EventArgs e)
+        {
+            Invoke(new MethodInvoker(delegate
+            {
+                _bindingSource.DataSource = _recordsList;
+                Dgv.DataSource = _bindingSource;
+                _bindingSource.CurrencyManager.Refresh();
+                
+                //set default values to filter combo-boxes
+                cbxFromHour.SelectedIndex = 11;
+                cbxFromMin.SelectedIndex = 0;
+                cbxFromTT.SelectedIndex = 0;
+                cbxToHour.SelectedIndex = 10;
+                cbxToMin.SelectedIndex = 59;
+                cbxToTT.SelectedIndex = 1;
+            }));
         }
 
         #endregion
@@ -190,18 +233,31 @@ namespace Smart_Battery_Charger
         //minimize form from btnMinimize button
         private void btnMinimize_Click(object sender, EventArgs e)
         {
-            Hide();
-            notifyIcon.ShowBalloonTip(
-                3000,
-                null,
-                @"Smart Battery Charger is still running Click here to activate.",
-                ToolTipIcon.Info
-            );
+            Invoke(new MethodInvoker(delegate
+            {
+                Hide();
+                notifyIcon.Visible = true;
+                notifyIcon.ShowBalloonTip
+                (
+                    3000,
+                    null,
+                    @"Smart Battery Charger is still running Click here to activate.",
+                    ToolTipIcon.Info
+                );
+            }));
         }
 
-        //maximize form from 
-        private void notifyIcon_BalloonTipClicked(object sender, EventArgs e) => Visible = true;
-        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e) => Visible = true;
+        //maximize form from
+        private void notifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            notifyIcon.Visible = false;
+            Invoke(new MethodInvoker(delegate { Visible = true; }));
+        }
+        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            notifyIcon.Visible = false;
+            Invoke(new MethodInvoker(delegate { Visible = true; }));
+        }
 
         #endregion
 
@@ -252,12 +308,17 @@ namespace Smart_Battery_Charger
         //PowerModeChanged event
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            lblChargerNow.Text = _resourcesMonitor.ChargerStatus;
+            Invoke(new MethodInvoker(delegate
+            {
+                lblChargerNow.Text = _resourcesMonitor.ChargerStatus;
 
-            //change lblChargerNow label according to charger status
-            lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
+                //change lblChargerNow label according to charger status
+                lblChargerNow.BackColor = lblChargerNow.Text == @"Online" ? Color.Chartreuse : Color.Red;
+
+            }));
         }
 
         #endregion
+
     }
 }

@@ -14,14 +14,13 @@ namespace Smart_Battery_Charger
 
         #endregion
 
-
         #region eventHandler
         
         //constructor
         public BatteryMonitor()
         {
             //SerialPort serialPort = new SerialPort();
-            var monitorThread = new Thread(CheckPercentageChanging) { Name = "CheckPercentageChanging_Thread", IsBackground = true };
+            var monitorThread = new Thread(CheckPercentageChanging) { Name = "threadCheckPercentageChanging", IsBackground = true };
             monitorThread.Start();
         }
 
@@ -32,12 +31,13 @@ namespace Smart_Battery_Charger
             var percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
 
             tryAgain:
-            Thread.Sleep(1000);
             if (percentSnapshot != (int) (batteryInfo.BatteryLifePercent * 100))
             {
                 percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
                 OnPercentChanged();
             }
+
+            Thread.Sleep(1000);
             goto tryAgain;
             // ReSharper disable once FunctionNeverReturns
         }

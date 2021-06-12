@@ -30,10 +30,9 @@ namespace Smart_Battery_Charger
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.Index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Date = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,6 +57,7 @@ namespace Smart_Battery_Charger
             this.label6 = new System.Windows.Forms.Label();
             this.btnMinimize = new System.Windows.Forms.Button();
             this.pnlFilter = new System.Windows.Forms.Panel();
+            this.btnClearFilter = new System.Windows.Forms.Button();
             this.cbxToTT = new System.Windows.Forms.ComboBox();
             this.cbxToMin = new System.Windows.Forms.ComboBox();
             this.cbxToHour = new System.Windows.Forms.ComboBox();
@@ -83,6 +83,7 @@ namespace Smart_Battery_Charger
             this.txtBatteryPercentage = new System.Windows.Forms.TextBox();
             this.txtDate = new System.Windows.Forms.TextBox();
             this.txtTime = new System.Windows.Forms.TextBox();
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -90,13 +91,6 @@ namespace Smart_Battery_Charger
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).BeginInit();
             this.pnlTb.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // notifyIcon
-            // 
-            this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
-            this.notifyIcon.Visible = true;
-            this.notifyIcon.BalloonTipClicked += new System.EventHandler(this.notifyIcon_BalloonTipClicked);
-            this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             // 
             // Index
             // 
@@ -320,6 +314,7 @@ namespace Smart_Battery_Charger
             // 
             // pnlFilter
             // 
+            this.pnlFilter.Controls.Add(this.btnClearFilter);
             this.pnlFilter.Controls.Add(this.cbxToTT);
             this.pnlFilter.Controls.Add(this.cbxToMin);
             this.pnlFilter.Controls.Add(this.cbxToHour);
@@ -336,6 +331,17 @@ namespace Smart_Battery_Charger
             this.pnlFilter.Name = "pnlFilter";
             this.pnlFilter.Size = new System.Drawing.Size(456, 211);
             this.pnlFilter.TabIndex = 14;
+            // 
+            // btnClearFilter
+            // 
+            this.btnClearFilter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.btnClearFilter.Location = new System.Drawing.Point(68, 152);
+            this.btnClearFilter.Name = "btnClearFilter";
+            this.btnClearFilter.Size = new System.Drawing.Size(144, 45);
+            this.btnClearFilter.TabIndex = 9;
+            this.btnClearFilter.Text = "Clear";
+            this.btnClearFilter.UseVisualStyleBackColor = false;
+            this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
             // 
             // cbxToTT
             // 
@@ -555,7 +561,7 @@ namespace Smart_Battery_Charger
             // 
             this.btnFilter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnFilter.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnFilter.Location = new System.Drawing.Point(266, 152);
+            this.btnFilter.Location = new System.Drawing.Point(251, 153);
             this.btnFilter.Name = "btnFilter";
             this.btnFilter.Size = new System.Drawing.Size(144, 44);
             this.btnFilter.TabIndex = 7;
@@ -782,6 +788,13 @@ namespace Smart_Battery_Charger
             this.txtTime.TabIndex = 0;
             this.txtTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // notifyIcon
+            // 
+            this.notifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
+            this.notifyIcon.BalloonTipClicked += new System.EventHandler(this.notifyIcon_BalloonTipClicked);
+            this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 28F);
@@ -812,7 +825,6 @@ namespace Smart_Battery_Charger
         }
 
         #endregion
-        private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn Index;
         private System.Windows.Forms.DataGridViewTextBoxColumn Date;
         private System.Windows.Forms.DataGridViewTextBoxColumn Time;
@@ -863,6 +875,7 @@ namespace Smart_Battery_Charger
         private System.Windows.Forms.ComboBox cbxToTT;
         private System.Windows.Forms.ComboBox cbxFromTT;
         private System.Windows.Forms.Button btnClearFilter;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
     }
 }
 

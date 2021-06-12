@@ -42,7 +42,6 @@ namespace Smart_Battery_Charger
 
         #endregion
 
-
         #region executionMethods
 
         private static string ExecuteReader(List<RecordInfo> recordsList, string cmdStm)
