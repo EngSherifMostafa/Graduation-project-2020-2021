@@ -9,7 +9,7 @@ create table tblLogFile
 	colDate date not null,
 	colTime time not null,
 	colBatteryPercent int not null,
-	colChargerStatus char(7) not null constraint colChargerStatus_Chk check (colChargerStatus in ('Online','Offline'))
+	colChargerStatus char(7) not null constraint colChargerStatus_Chk check (colChargerStatus in ('Online','Offline')),
 	colCpuPerformance int not null,
 	colRamPerformance int not null,
 	colHardDiskPerformance int not null
@@ -32,10 +32,8 @@ Select colIndex as [Index],
 format ([colDate], 'dd MMMM yyyy') as [Date], 
 (SELECT format (cast ([colTime] as datetime), 'hh:mm:ss tt')) as [Time], 
 [colBatteryPercent] as [Battery Status], 
-
-
-
-trim([colChargerStatus]) as [Charger Status] 
-
-
+trim([colChargerStatus]) as [Charger Status],
+[colCpuPerformance] as [Cpu Utilization],
+[colRamPerformance] as [Ram Utilization],
+[colHardDiskPerformance] as [Hard Disk Utilization]
 from [tblLogFile]
