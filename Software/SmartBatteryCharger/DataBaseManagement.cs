@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace Smart_Battery_Charger
 {

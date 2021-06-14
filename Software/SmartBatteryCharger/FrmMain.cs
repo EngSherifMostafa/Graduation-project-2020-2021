@@ -1,10 +1,10 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System;
 using System.Linq;
+using System.Drawing;
+using Microsoft.Win32;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace Smart_Battery_Charger
 {

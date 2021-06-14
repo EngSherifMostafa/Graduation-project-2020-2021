@@ -35,7 +35,6 @@ namespace Smart_Battery_Charger
 
         #endregion
 
-
         #region accessors
 
         public int CpuMonitor => (int)_cpuCounter.NextValue();
