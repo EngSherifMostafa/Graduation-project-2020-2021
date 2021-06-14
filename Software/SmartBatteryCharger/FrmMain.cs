@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
-using Microsoft.Win32;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using System.Collections.Generic;
 
 namespace Smart_Battery_Charger
 {
@@ -186,7 +186,7 @@ namespace Smart_Battery_Charger
                 _bindingSource.DataSource = _recordsList;
                 Dgv.DataSource = _bindingSource;
                 _bindingSource.CurrencyManager.Refresh();
-                
+
                 //set default values to filter combo-boxes
                 cbxFromHour.SelectedIndex = 11;
                 cbxFromMin.SelectedIndex = 0;
@@ -265,7 +265,7 @@ namespace Smart_Battery_Charger
 
         private void UpdateResourcesUsage()
         {
-            tryAgain:
+        tryAgain:
             try
             {
                 Invoke(new MethodInvoker(delegate
@@ -319,6 +319,5 @@ namespace Smart_Battery_Charger
         }
 
         #endregion
-
     }
 }

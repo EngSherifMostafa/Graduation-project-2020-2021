@@ -15,7 +15,7 @@ namespace Smart_Battery_Charger
         #endregion
 
         #region eventHandler
-        
+
         //constructor
         public BatteryMonitor()
         {
@@ -28,12 +28,12 @@ namespace Smart_Battery_Charger
         private void CheckPercentageChanging()
         {
             var batteryInfo = SystemInformation.PowerStatus;
-            var percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
+            var percentSnapshot = (int)(batteryInfo.BatteryLifePercent * 100);
 
-            tryAgain:
-            if (percentSnapshot != (int) (batteryInfo.BatteryLifePercent * 100))
+        tryAgain:
+            if (percentSnapshot != (int)(batteryInfo.BatteryLifePercent * 100))
             {
-                percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
+                percentSnapshot = (int)(batteryInfo.BatteryLifePercent * 100);
                 OnPercentChanged();
             }
 
@@ -50,8 +50,6 @@ namespace Smart_Battery_Charger
 
         //private void SendSignal(string command, int timeInSecond)
         //{
-
-
         //    check if bluetooth module port is open :
         //    if (serialPort.IsOpen)
         //    {

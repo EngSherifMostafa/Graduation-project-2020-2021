@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Collections.Generic;
 
 namespace Smart_Battery_Charger
 {
@@ -60,14 +60,14 @@ namespace Smart_Battery_Charger
                 {
                     recordsList.Add(new RecordInfo
                     {
-                        Index = (int) reader["Index"],
+                        Index = (int)reader["Index"],
                         Date = reader["Date"].ToString(),
                         Time = reader["Time"].ToString(),
                         BatteryPercent = (int)reader["Battery Status"],
                         ChargerStatus = reader["Charger Status"].ToString(),
-                        CpuUtilization = (int) reader["Cpu Utilization"],
-                        RamUtilization = (int) reader["Ram Utilization"],
-                        HdUtilization = (int) reader["Hard Disk Utilization"]
+                        CpuUtilization = (int)reader["Cpu Utilization"],
+                        RamUtilization = (int)reader["Ram Utilization"],
+                        HdUtilization = (int)reader["Hard Disk Utilization"]
                     });
                 }
             }
