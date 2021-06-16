@@ -28,15 +28,14 @@ namespace Smart_Battery_Charger
         private void CheckPercentageChanging()
         {
             var batteryInfo = SystemInformation.PowerStatus;
-            var percentSnapshot = (int)(batteryInfo.BatteryLifePercent * 100);
+            var percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
 
-        tryAgain:
-            if (percentSnapshot != (int)(batteryInfo.BatteryLifePercent * 100))
+            tryAgain:
+            if (percentSnapshot != (int) (batteryInfo.BatteryLifePercent * 100))
             {
-                percentSnapshot = (int)(batteryInfo.BatteryLifePercent * 100);
+                percentSnapshot = (int) (batteryInfo.BatteryLifePercent * 100);
                 OnPercentChanged();
             }
-
             Thread.Sleep(1000);
             goto tryAgain;
             // ReSharper disable once FunctionNeverReturns
