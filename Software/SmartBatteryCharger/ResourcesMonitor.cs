@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Smart_Battery_Charger
@@ -23,6 +24,7 @@ namespace Smart_Battery_Charger
             //initialize BatteryMonitor to provide streaming battery percentages
             BatteryMonitor = new BatteryMonitor();
             _batteryInfo = SystemInformation.PowerStatus;
+
             //1,000,000 = 1000 * 1000 ( Byte => M.Byte )
             _ramTotalSize = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / (ulong)1e6;
 
@@ -41,10 +43,23 @@ namespace Smart_Battery_Charger
         public int BatteryPercent => (int)(_batteryInfo.BatteryLifePercent * 100);
         public string ChargerStatus => _batteryInfo.PowerLineStatus.ToString();
 
-        public int CpuMonitor => (int)_cpuCounter.NextValue();
-        public int RamMonitor => (int)((_ramTotalSize - _ramCounter.NextValue()) / _ramTotalSize * 100);
-        //public int GpuMonitor => (int) _gpuCounter.NextValue();
-        public int HdMonitor => (int)_hdCounter.NextValue();
+        public int CpuMonitor()
+        {
+            var cpuTemp = (int)_cpuCounter.NextValue();
+            return cpuTemp > 100 ? 100 : cpuTemp;
+        }
+
+        public int RamMonitor()
+        {
+            var ramTemp = Convert.ToInt32((_ramTotalSize - _ramCounter.NextValue()) / _ramTotalSize * 100);
+            return ramTemp > 100 ? 100 : ramTemp;
+        }
+
+        public int HdMonitor()
+        {
+            var hdTemp = (int) _hdCounter.NextValue();
+            return hdTemp > 100 ? 100 : hdTemp;
+        }
 
         #endregion
     }

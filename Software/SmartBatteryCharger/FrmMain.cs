@@ -96,8 +96,8 @@ namespace Smart_Battery_Charger
             {
                 return DataBaseManagement.InsertStm(
                     _resourcesMonitor.BatteryPercent,
-                    _resourcesMonitor.ChargerStatus, _resourcesMonitor.CpuMonitor, _resourcesMonitor.RamMonitor,
-                    _resourcesMonitor.HdMonitor
+                    _resourcesMonitor.ChargerStatus, _resourcesMonitor.CpuMonitor(), _resourcesMonitor.RamMonitor(),
+                    _resourcesMonitor.HdMonitor()
                 );
             }
 
@@ -159,15 +159,16 @@ namespace Smart_Battery_Charger
                 cbxToHour.Text + ":" + cbxToMin.Text + ":" + cbxToSec.Text + " " + cbxToTT.Text
             );
 
+            //filterFrom date not equal to or greater than filterTo date
             if (DateTime.Compare(filterFrom, filterTo) is 0 or 1) return;
             //linq statement filter data
-            var dateFiltered = _recordsList.Where(record =>
+            var dataFiltered = _recordsList.Where(record =>
                 Convert.ToDateTime(string.Concat(record.Date, " ", record.Time)) >= filterFrom &&
                 Convert.ToDateTime(string.Concat(record.Date, " ", record.Time)) <= filterTo);
 
             try
             {
-                ResetDgv(dateFiltered);
+                ResetDgv(dataFiltered);
             }
             catch (Exception err)
             {
@@ -290,14 +291,18 @@ namespace Smart_Battery_Charger
             {
                 Invoke(new MethodInvoker(delegate
                 {
-                    pbCpu.Value = _resourcesMonitor.CpuMonitor;
-                    lblCpuPercent.Text = pbCpu.Value + @" %";
+                    var cpuTemp = _resourcesMonitor.CpuMonitor();
+                    var ramTemp = _resourcesMonitor.RamMonitor();
+                    var hdTemp = _resourcesMonitor.HdMonitor();
 
-                    pbRam.Value = _resourcesMonitor.RamMonitor;
-                    lblRamPercent.Text = pbRam.Value + @" %";
+                    pbCpu.Value = cpuTemp;
+                    lblCpuPercent.Text = cpuTemp + @" %";
 
-                    pbHD.Value = _resourcesMonitor.HdMonitor;
-                    lblHDPercent.Text = pbHD.Value + @" %";
+                    pbRam.Value = ramTemp;
+                    lblRamPercent.Text = ramTemp + @" %";
+
+                    pbHD.Value = hdTemp;
+                    lblHDPercent.Text = hdTemp + @" %";
                 }));
             }
 
