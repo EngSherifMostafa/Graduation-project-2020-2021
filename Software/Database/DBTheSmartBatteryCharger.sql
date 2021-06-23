@@ -1,9 +1,11 @@
 --create main database
 CREATE DATABASE DBTheSmartBatteryCharger
 
+
 --go to main database
 USE [DBTheSmartBatteryCharger]
 GO
+
 
 --create main table
 CREATE TABLE tblLogFile
@@ -18,6 +20,7 @@ CREATE TABLE tblLogFile
 	colHardDiskPerformance INT NOT NULL
 )
 
+
 --insert statement
 INSERT INTO tblLogFile VALUES
 (
@@ -30,8 +33,10 @@ INSERT INTO tblLogFile VALUES
 	2
 )
 
+
 --delete statement
 DELETE FROM [tblLogFile] WHERE colIndex = 154
+
 
 --select * from main table
 SELECT colIndex AS [Index],
@@ -69,36 +74,37 @@ FROM tblLogFile
 GROUP By [colChargerStatus]
 ORDER BY [colChargerStatus] DESC
 
+
 --create view for report
 CREATE VIEW [vWReport]
 	AS
 	SELECT
-		ColChargerStatus,
-
-		PARSE(CONCAT(colDate,' ', colTime) AS DATETIME) AS [Current Date],
-		LAG(PARSE(CONCAT(colDate, ' ', colTime) AS DATETIME), 1, NULL) OVER(ORDER BY colDate, colTime) AS [Lag Date],
-	
-		colBatteryPercent,
-		LAG(colBatteryPercent, 1, NULL) OVER(ORDER BY colBatteryPercent) AS [colLeadBatteryPercent]
+		PARSE(CONCAT(colDate,' ', colTime) AS DATETIME) AS [colCurrentDate],
+		LAG(PARSE(CONCAT(colDate, ' ', colTime) AS DATETIME), 1, NULL) OVER(ORDER BY colDate, colTime) AS [colLagDate],
+		LAG(colBatteryPercent, 1, NULL) OVER(ORDER BY colBatteryPercent) AS [colLagBatteryPercent]
 	FROM tblLogFile
 
-----------------------------------------------------------------------------------------------------------------------------------
 
+--create report from view
 SELECT
-	*,
-	(colBatteryPercent - colLeadBatteryPercent) AS [colBatteryPercentDiff],
+	[vWReport].[colCurrentDate], [vWReport].[colLagDate],
 	
 	(
 		DATEDIFF
 			(
 				SECOND,
-				[Current Date],
-				[Lag Date]
+				[vWReport].[colLagDate],
+				[vWReport].[colCurrentDate]
 			)
-	)	AS [colDateTimeDiff]
+	) AS [colDateTimeDiff],
 
-FROM vWReport
-ORDER BY [Lag Date]
+	[tblLogFile].[colBatteryPercent], [vWReport].[colLagBatteryPercent], ([tblLogFile].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]) AS [colBatteryPercentDiff],
+	[tblLogFile].[colCpuPerformance], [tblLogFile].[colRamPerformance], [tblLogFile].[colHardDiskPerformance], [tblLogFile].[colChargerStatus]
 
+FROM vWReport, tblLogFile
+WHERE [vWReport].[colCurrentDate] BETWEEN '2021-06-11 00:00:00' AND '2021-06-12 23:59:59'
+ORDER BY [vWReport].[colCurrentDate], [vWReport].[colLagDate]
+
+-----------------------------------------------------------------------------------------
 
 exec sp_help vWReport

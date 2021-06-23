@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using System.Threading;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Smart_Battery_Charger
 {
@@ -12,8 +13,9 @@ namespace Smart_Battery_Charger
     {
         #region initializer
 
-        //declare list of class RecordInfo to be data source for data grid view
+        //declare list of class RecordInfo and ReportInfo to be data source for data grid view and source for log file report
         private readonly List<RecordInfo> _recordsList;
+        private readonly List<ReportInfo> _reportList;
 
         //declare Resource Monitor that collects data about user usage
         private readonly ResourcesMonitor _resourcesMonitor;
@@ -29,10 +31,13 @@ namespace Smart_Battery_Charger
             InitializeComponent();
             _bindingSource = new BindingSource();
             _recordsList = new List<RecordInfo>();
+            _reportList = new List<ReportInfo>();
             _resourcesMonitor = new ResourcesMonitor();
 
-            //get battery percent at initialization time
+            //get battery percent at initialization time and format DateTimePickers
             lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
+            dtpDateFrom.CustomFormat = @"dd-MM-yyyy";
+            dtpDateTo.CustomFormat = @"dd-MM-yyyy";
 
             //enable thread that responsible for update machine info part & insert record at database
             _threadUpdateResourcesUsage = new Thread(UpdateResourcesUsage)
@@ -51,8 +56,9 @@ namespace Smart_Battery_Charger
             //add InsertAtChange to PercentChanged event
             _resourcesMonitor.BatteryMonitor.PercentChanged += InsertAtChange;
 
-            //set default values to filter combo-boxes and dateTimePickers
+            //set default values to filter combo-boxes and dateTimePickers and change dgv headers name
             ResetFilterBoxes();
+            ChangeDgvHeaders();
         }
 
         #endregion
@@ -72,7 +78,6 @@ namespace Smart_Battery_Charger
 
             if (errMsg != string.Empty)
                 MessageBox.Show(errMsg, @"FrmMain_Load");
-
             else
                 ResetDgv(_recordsList);
         }
@@ -159,8 +164,12 @@ namespace Smart_Battery_Charger
                 cbxToHour.Text + ":" + cbxToMin.Text + ":" + cbxToSec.Text + " " + cbxToTT.Text
             );
 
-            //filterFrom date not equal to or greater than filterTo date
-            if (DateTime.Compare(filterFrom, filterTo) is 0 or 1) return;
+            //filterFrom date not equal to or greater than filterTo date or date after now
+            if (DateTime.Compare(filterFrom, filterTo) is 0 or 1 ||
+                DateTime.Compare(filterFrom, DateTime.Now) is 1 ||
+                DateTime.Compare(filterTo, DateTime.Now) is 1)
+                return;
+
             //linq statement filter data
             var dataFiltered = _recordsList.Where(record =>
                 Convert.ToDateTime(string.Concat(record.Date, " ", record.Time)) >= filterFrom &&
@@ -176,6 +185,23 @@ namespace Smart_Battery_Charger
             }
         }
 
+        private void btnReport_Click(object sender, EventArgs e)
+        {
+            var fromHours = Convert12To24HourSystem(Convert.ToInt32(cbxFromHour.Text), cbxFromTT.Text);
+            var toHours = Convert12To24HourSystem(Convert.ToInt32(cbxToHour.Text), cbxToTT.Text);
+
+            //build dates that user want to report from and to
+            var startDate =
+                @$"{dtpDateFrom.Value.Year}-{dtpDateFrom.Value.Month}-{dtpDateFrom.Value.Day} {fromHours}:{cbxFromMin.Text}:{cbxFromSec.Text}";
+
+            var endDate =
+                @$"{dtpDateTo.Value.Year}-{dtpDateTo.Value.Month}-{dtpDateTo.Value.Day} {toHours}:{cbxToMin.Text}:{cbxToSec.Text}";
+
+            DataBaseManagement.SelectStm(_reportList, startDate, endDate);
+
+            MessageBox.Show(_reportList.Aggregate(string.Empty, (current, item) => current + item.LagBatteryPercent));
+        }
+
         private void btnClearFilter_Click(object sender, EventArgs e)
         {
             ResetDgv(_recordsList);
@@ -187,7 +213,10 @@ namespace Smart_Battery_Charger
         #region textboxes
 
         //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
-        private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e) => FillTextBoxes(Dgv.Rows[e.RowIndex]);
+        private void Dgv_RowEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            FillTextBoxes(Dgv.Rows[e.RowIndex]);
+        }
 
         //fill textboxes according to row index passed
         private void FillTextBoxes(DataGridViewRow row)
@@ -196,7 +225,7 @@ namespace Smart_Battery_Charger
             {
                 try
                 {
-                    //clear text boxes when table has zero rows
+                    //clear text boxes when _recordsList has zero rows
                     if (_recordsList.Count == 0)
                     {
                         txtIndex.Clear();
@@ -211,7 +240,6 @@ namespace Smart_Battery_Charger
                         return;
                     }
 
-                    if(row == null) return;
                     txtIndex.Text = row.Cells[0].Value.ToString();
                     txtDate.Text = row.Cells[1].Value.ToString();
                     txtTime.Text = row.Cells[2].Value.ToString();
@@ -277,8 +305,10 @@ namespace Smart_Battery_Charger
 
         }
 
-        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e) =>
+        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
             notifyIcon_BalloonTipClicked(sender, e);
+        }
 
         #endregion
 
@@ -360,16 +390,20 @@ namespace Smart_Battery_Charger
             {
                 //set default values to filter combo-boxes
                 dtpDateFrom.Value = DateTime.Now.Date;
-                cbxFromHour.SelectedIndex = 11;
-                cbxFromMin.SelectedIndex = 0;
-                cbxFromSec.SelectedIndex = 0;
-                cbxFromTT.SelectedIndex = 0;
+                cbxFromHour.SelectedIndex = cbxFromHour.FindString(@"12");
+                cbxFromMin.SelectedIndex = cbxFromMin.FindString(@"00");
+                cbxFromSec.SelectedIndex = cbxFromSec.FindString(@"00");
+                cbxFromTT.SelectedIndex = cbxFromTT.FindString(@"AM");
 
                 dtpDateTo.Value = DateTime.Now.Date;
-                cbxToHour.SelectedIndex = 10;
-                cbxToMin.SelectedIndex = 59;
-                cbxToSec.SelectedIndex = 59;
-                cbxToTT.SelectedIndex = 1;
+                cbxToHour.SelectedIndex = cbxToHour.FindString(Convert24To12HourSystem(DateTime.Now.Hour).Value);
+                cbxToMin.SelectedIndex = cbxToMin.FindString(DateTime.Now.Minute.ToString().Length == 1
+                    ? @$"0+{DateTime.Now.Minute}"
+                    : DateTime.Now.Minute.ToString());
+                cbxToSec.SelectedIndex = cbxToSec.FindString(DateTime.Now.Second.ToString().Length == 1
+                    ? @$"0+{DateTime.Now.Second}"
+                    : DateTime.Now.Second.ToString());
+                cbxToTT.SelectedIndex = cbxToTT.FindString(Convert24To12HourSystem(DateTime.Now.Hour).Key);
             }
 
             if (InvokeRequired)
@@ -382,6 +416,7 @@ namespace Smart_Battery_Charger
         {
             void LocalResetDgv()
             {
+                ChangeDgvHeaders();
                 _bindingSource.DataSource = dataSource;
                 Dgv.DataSource = _bindingSource;
                 _bindingSource.CurrencyManager.Refresh();
@@ -397,6 +432,7 @@ namespace Smart_Battery_Charger
         {
             void LocalResetDgv()
             {
+                ChangeDgvHeaders();
                 _bindingSource.DataSource = dataSource;
                 Dgv.DataSource = _bindingSource;
                 _bindingSource.CurrencyManager.Refresh();
@@ -407,6 +443,76 @@ namespace Smart_Battery_Charger
             else
                 LocalResetDgv();
         }
+
+        private void ChangeDgvHeaders()
+        {
+            if (Dgv.Columns[@"BatteryPercent"] != null)
+                Dgv.Columns[@"BatteryPercent"].HeaderText = @"Battery Percent";
+
+            if (Dgv.Columns[@"ChargerStatus"] != null)
+                Dgv.Columns[@"ChargerStatus"].HeaderText = @"Charger Status";
+
+            if (Dgv.Columns[@"CpuUtilization"] != null)
+                Dgv.Columns[@"CpuUtilization"].HeaderText = @"Processor Utilization";
+
+            if (Dgv.Columns[@"RamUtilization"] != null)
+                Dgv.Columns[@"RamUtilization"].HeaderText = @"RAM Utilization";
+
+            if (Dgv.Columns[@"HdUtilization"] != null)
+                Dgv.Columns[@"HdUtilization"].HeaderText = @"Hard Disk Utilization";
+        }
+
+        private KeyValuePair<string, string> Convert24To12HourSystem(int hoursIn24) =>
+            hoursIn24 switch
+            {
+                0 => new KeyValuePair<string, string>(@"AM", "12"),
+                1 => new KeyValuePair<string, string>(@"AM", "01"),
+                2 => new KeyValuePair<string, string>(@"AM", "02"),
+                3 => new KeyValuePair<string, string>(@"AM", "03"),
+                4 => new KeyValuePair<string, string>(@"AM", "04"),
+                5 => new KeyValuePair<string, string>(@"AM", "05"),
+                6 => new KeyValuePair<string, string>(@"AM", "06"),
+                7 => new KeyValuePair<string, string>(@"AM", "07"),
+                8 => new KeyValuePair<string, string>(@"AM", "08"),
+                9 => new KeyValuePair<string, string>(@"AM", "09"),
+                10 => new KeyValuePair<string, string>(@"AM", hoursIn24.ToString()),
+                11 => new KeyValuePair<string, string>(@"AM", hoursIn24.ToString()),
+                12 => new KeyValuePair<string, string>(@"PM", "12"),
+                _ => new KeyValuePair<string, string>(@"PM", (hoursIn24 - 12).ToString())
+            };
+
+        private string Convert12To24HourSystem(int hoursIn12, string tt) =>
+            tt switch
+            {
+                @"AM" when hoursIn12 == 12 => "00",
+                @"AM" when hoursIn12 == 1 => "01",
+                @"AM" when hoursIn12 == 2 => "02",
+                @"AM" when hoursIn12 == 3 => "03",
+                @"AM" when hoursIn12 == 4 => "04",
+                @"AM" when hoursIn12 == 5 => "05",
+                @"AM" when hoursIn12 == 6 => "06",
+                @"AM" when hoursIn12 == 7 => "07",
+                @"AM" when hoursIn12 == 8 => "08",
+                @"AM" when hoursIn12 == 9 => "09",
+                @"AM" when hoursIn12 == 10 => "10",
+                @"AM" when hoursIn12 == 11 => "11",
+
+                @"PM" when hoursIn12 == 12 => "12",
+                @"PM" when hoursIn12 == 1 => "13",
+                @"PM" when hoursIn12 == 2 => "14",
+                @"PM" when hoursIn12 == 3 => "15",
+                @"PM" when hoursIn12 == 4 => "16",
+                @"PM" when hoursIn12 == 5 => "17",
+                @"PM" when hoursIn12 == 6 => "18",
+                @"PM" when hoursIn12 == 7 => "19",
+                @"PM" when hoursIn12 == 8 => "20",
+                @"PM" when hoursIn12 == 9 => "21",
+                @"PM" when hoursIn12 == 10 => "22",
+                @"PM" when hoursIn12 == 11 => "23",
+                _ => string.Empty
+            };
+
+        private string AddOneDigit(string str) => str.Length == 1 ? $"0 + {str}" : str;
 
         #endregion
     }

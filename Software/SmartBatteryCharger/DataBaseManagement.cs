@@ -19,26 +19,40 @@ namespace Smart_Battery_Charger
 
         public static string SelectStm(List<RecordInfo> recordsList, string whereStm = null) =>
             ExecuteReader(recordsList,
-                @$"Select colIndex as [Index], 
-                        format ([colDate], 'dd MMMM yyyy') as [Date], 
-                        (SELECT format (cast ([colTime] as datetime), 'hh:mm:ss tt')) as [Time], 
-                        [colBatteryPercent] as [Battery Status], 
-                        trim([colChargerStatus]) as [Charger Status],
-                        [colCpuPerformance] as [Cpu Utilization],
-                        [colRamPerformance] as [Ram Utilization],
-                        [colHardDiskPerformance] as [Hard Disk Utilization]
-                        from [tblLogFile] {whereStm}");
+                @$"SELECT colIndex AS [Index], 
+                        FORMAT ([colDate], 'dd MMMM yyyy') AS [Date], 
+                        (SELECT FORMAT (CAST ([colTime] AS DATETIME), 'hh:mm:ss tt')) AS [Time], 
+                        [colBatteryPercent] AS [Battery Status], 
+                        TRIM([colChargerStatus]) AS [Charger Status],
+                        [colCpuPerformance] AS [Cpu Utilization],
+                        [colRamPerformance] AS [Ram Utilization],
+                        [colHardDiskPerformance] AS [Hard Disk Utilization]
+                        FROM [tblLogFile] {whereStm}");
+
+        public static string SelectStm(List<ReportInfo> reportList, string startDate, string endDate) =>
+            ExecuteReader(reportList,
+                @$"SELECT
+                            [vWReport].[colCurrentDate], [vWReport].[colLagDate],
+                            (DATEDIFF(SECOND,[vWReport].[colLagDate],[vWReport].[colCurrentDate])) AS [colDateTimeDiff],
+	                        [tblLogFile].[colBatteryPercent], [vWReport].[colLagBatteryPercent],
+                            ([tblLogFile].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]) AS [colBatteryPercentDiff],
+	                        [tblLogFile].[colCpuPerformance], [tblLogFile].[colRamPerformance], [tblLogFile].[colHardDiskPerformance],
+                            [tblLogFile].[colChargerStatus]
+                            FROM vWReport, tblLogFile
+                            WHERE [vWReport].[colCurrentDate] BETWEEN '{startDate}' AND '{endDate}'
+                            ORDER BY [vWReport].[colCurrentDate], [vWReport].[colLagDate]"
+            );
 
         public static string InsertStm(int batteryPercentage, string chargerStatus,
             int cpuUtilization, int ramUtilization, int hdUtilization) =>
             ExecuteNonQuery(
-                @$"insert into tblLogFile values (
-                (format (GETDATE(), 'dd MMMM yyyy')), (format (GETDATE(), 'hh:mm:ss tt')), 
+                @$"INSERT INTO tblLogFile VALUES (
+                (FORMAT (GETDATE(), 'dd MMMM yyyy')), (FORMAT (GETDATE(), 'hh:mm:ss tt')), 
                 {batteryPercentage}, '{chargerStatus}',
                 {cpuUtilization}, {ramUtilization}, {hdUtilization})");
 
         public static string DeleteStm(int recIndex) =>
-            ExecuteNonQuery($"Delete from tblLogFile where colIndex = {recIndex}");
+            ExecuteNonQuery($"DELETE FROM tblLogFile WHERE colIndex = {recIndex}");
 
         #endregion
 
@@ -60,14 +74,52 @@ namespace Smart_Battery_Charger
                 {
                     recordsList.Add(new RecordInfo
                     {
-                        Index = (int)reader["Index"],
+                        Index = Convert.ToInt32(reader["Index"]),
                         Date = reader["Date"].ToString(),
                         Time = reader["Time"].ToString(),
-                        BatteryPercent = (int)reader["Battery Status"],
+                        BatteryPercent = Convert.ToInt32(reader["Battery Status"]),
                         ChargerStatus = reader["Charger Status"].ToString(),
-                        CpuUtilization = (int)reader["Cpu Utilization"],
-                        RamUtilization = (int)reader["Ram Utilization"],
-                        HdUtilization = (int)reader["Hard Disk Utilization"]
+                        CpuUtilization = Convert.ToInt32(reader["Cpu Utilization"]),
+                        RamUtilization = Convert.ToInt32(reader["Ram Utilization"]),
+                        HdUtilization = Convert.ToInt32(reader["Hard Disk Utilization"])
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+            finally
+            {
+                Con.Close();
+            }
+
+            return string.Empty;
+        }
+
+        private static string ExecuteReader(List<ReportInfo> recordsList, string cmdStm)
+        {
+            Cmd.CommandText = cmdStm;
+            Cmd.Connection = Con;
+
+            try
+            {
+                Con.Open();
+                var reader = Cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    recordsList.Add(new ReportInfo()
+                    {
+                        CurrentDate = reader["colCurrentDate"].ToString(),
+                        LagDate = reader["colLagDate"].ToString(),
+                        DateTimeDiff = reader["colDateTimeDiff"].ToString(),
+                        BatteryPercent = Convert.ToInt32(reader["colBatteryPercent"]),
+                        LagBatteryPercent = Convert.ToInt32(reader["colLagBatteryPercent"]),
+                        BatteryPercentDiff = Convert.ToInt32(reader["colBatteryPercentDiff"]),
+                        CpuPerformance = Convert.ToInt32(reader["colCpuPerformance"]),
+                        RamPerformance = Convert.ToInt32(reader["colRamPerformance"]),
+                        HdPerformance = Convert.ToInt32(reader["colHardDiskPerformance"]),
+                        ChargerStatus = reader["colChargerStatus"].ToString()
                     });
                 }
             }
