@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 
-namespace Smart_Battery_Charger
+namespace Smart_Battery_Monitor
 {
     internal class DataBaseManagement
     {
@@ -17,31 +17,37 @@ namespace Smart_Battery_Charger
 
         #region publicMethods
 
-        public static string SelectStm(List<RecordInfo> recordsList, string whereStm = null) =>
+        public static string SelectStm() =>
+            ExecuteScalar(@"SELECT COUNT(*) FROM tblLogFile");
+
+        public static string SelectStm(ICollection<RecordInfo> recordsList, string whereStm = null) =>
             ExecuteReader(recordsList,
-                @$"SELECT colIndex AS [Index], 
+                @$"SELECT colIndex AS [Index],
                         FORMAT ([colDate], 'dd MMMM yyyy') AS [Date], 
-                        (SELECT FORMAT (CAST ([colTime] AS DATETIME), 'hh:mm:ss tt')) AS [Time], 
-                        [colBatteryPercent] AS [Battery Status], 
+                        (SELECT FORMAT (CAST ([colTime] AS DATETIME), 'hh:mm:ss tt')) AS [Time],
+                        [colBatteryPercent] AS [Battery Status],
                         TRIM([colChargerStatus]) AS [Charger Status],
                         [colCpuPerformance] AS [Cpu Utilization],
                         [colRamPerformance] AS [Ram Utilization],
                         [colHardDiskPerformance] AS [Hard Disk Utilization]
                         FROM [tblLogFile] {whereStm}");
 
-        public static string SelectStm(List<ReportInfo> reportList, string startDate, string endDate) =>
+        public static string SelectStm(ICollection<ReportInfo> reportList, string startDate, string endDate) =>
             ExecuteReader(reportList,
-                @$"SELECT
-                            [vWReport].[colCurrentDate], [vWReport].[colLagDate],
-                            (DATEDIFF(SECOND,[vWReport].[colLagDate],[vWReport].[colCurrentDate])) AS [colDateTimeDiff],
-	                        [tblLogFile].[colBatteryPercent], [vWReport].[colLagBatteryPercent],
-                            ([tblLogFile].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]) AS [colBatteryPercentDiff],
-	                        [tblLogFile].[colCpuPerformance], [tblLogFile].[colRamPerformance], [tblLogFile].[colHardDiskPerformance],
-                            [tblLogFile].[colChargerStatus]
-                            FROM vWReport, tblLogFile
-                            WHERE [vWReport].[colCurrentDate] BETWEEN '{startDate}' AND '{endDate}'
-                            ORDER BY [vWReport].[colCurrentDate], [vWReport].[colLagDate]"
-            );
+                $@"SELECT
+	                    [vWReport].[colCurrentDate], [vWReport].[colLagDate],
+                        (DATEDIFF(SECOND, [vWReport].[colLagDate], [vWReport].[colCurrentDate])) AS [colDateTimeDiff],
+	                    [vWReport].[colBatteryPercent], [vWReport].[colLagBatteryPercent],
+                        ([vWReport].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]) AS [colBatteryPercentDiff],
+                        ABS(ISNULL(
+	                    (DATEDIFF(SECOND, [vWReport].[colLagDate], [vWReport].[colCurrentDate])) /
+	                    NULLIF(([vWReport].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]), 0), 0))
+	                    AS [colBatteryUsagePerSecond],
+	                    [vWReport].[colCpuPerformance], [vWReport].[colRamPerformance], [vWReport].[colHardDiskPerformance],
+                        [vWReport].[colChargerStatus]
+                        FROM vWReport
+                        WHERE [vWReport].[colCurrentDate] BETWEEN '{startDate}' AND '{endDate}'
+                        ORDER BY [vWReport].[colIndex]");
 
         public static string InsertStm(int batteryPercentage, string chargerStatus,
             int cpuUtilization, int ramUtilization, int hdUtilization) =>
@@ -58,7 +64,7 @@ namespace Smart_Battery_Charger
 
         #region executionMethods
 
-        private static string ExecuteReader(List<RecordInfo> recordsList, string cmdStm)
+        private static string ExecuteReader(ICollection<RecordInfo> recordsList, string cmdStm)
         {
             //clear list to refill it
             recordsList.Clear();
@@ -87,7 +93,7 @@ namespace Smart_Battery_Charger
             }
             catch (Exception e)
             {
-                return e.Message;
+                return e.Message + " - RecordInfo";
             }
             finally
             {
@@ -97,7 +103,7 @@ namespace Smart_Battery_Charger
             return string.Empty;
         }
 
-        private static string ExecuteReader(List<ReportInfo> recordsList, string cmdStm)
+        private static string ExecuteReader(ICollection<ReportInfo> reportList, string cmdStm)
         {
             Cmd.CommandText = cmdStm;
             Cmd.Connection = Con;
@@ -108,7 +114,7 @@ namespace Smart_Battery_Charger
                 var reader = Cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    recordsList.Add(new ReportInfo()
+                    reportList.Add(new ReportInfo()
                     {
                         CurrentDate = reader["colCurrentDate"].ToString(),
                         LagDate = reader["colLagDate"].ToString(),
@@ -116,6 +122,7 @@ namespace Smart_Battery_Charger
                         BatteryPercent = Convert.ToInt32(reader["colBatteryPercent"]),
                         LagBatteryPercent = Convert.ToInt32(reader["colLagBatteryPercent"]),
                         BatteryPercentDiff = Convert.ToInt32(reader["colBatteryPercentDiff"]),
+                        BatteryUsagePerSecond = Convert.ToInt32(reader["colBatteryUsagePerSecond"]),
                         CpuPerformance = Convert.ToInt32(reader["colCpuPerformance"]),
                         RamPerformance = Convert.ToInt32(reader["colRamPerformance"]),
                         HdPerformance = Convert.ToInt32(reader["colHardDiskPerformance"]),
@@ -125,7 +132,7 @@ namespace Smart_Battery_Charger
             }
             catch (Exception e)
             {
-                return e.Message;
+                return e.Message + " - ReportInfo";
             }
             finally
             {
@@ -147,7 +154,7 @@ namespace Smart_Battery_Charger
             }
             catch (Exception e)
             {
-                return e.Message;
+                return e.Message + " - NonQuery";
             }
             finally
             {
@@ -157,7 +164,7 @@ namespace Smart_Battery_Charger
             return string.Empty;
         }
 
-        private static string ExecuteScalar(string cmdStm, object retObj)
+        private static string ExecuteScalar(string cmdStm)
         {
             Cmd.Connection = Con;
             Cmd.CommandText = cmdStm;
@@ -165,21 +172,18 @@ namespace Smart_Battery_Charger
             try
             {
                 Con.Open();
-                retObj = Cmd.ExecuteScalar();
+                return Cmd.ExecuteScalar().ToString();
             }
             catch (Exception e)
             {
-                return e.Message;
+                return e.Message + " - Scalar";
             }
             finally
             {
                 Con.Close();
             }
-
-            return string.Empty;
-
-
-            #endregion
         }
+
+        #endregion
     }
 }

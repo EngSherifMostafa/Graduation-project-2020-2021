@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 
-namespace Smart_Battery_Charger
+namespace Smart_Battery_Monitor
 {
     internal class Program
     {

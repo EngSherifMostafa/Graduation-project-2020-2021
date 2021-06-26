@@ -1,4 +1,4 @@
-namespace Smart_Battery_Charger
+namespace Smart_Battery_Monitor
 {
     internal record ReportInfo
     {
@@ -8,6 +8,7 @@ namespace Smart_Battery_Charger
         public int BatteryPercent { get; set; }
         public int LagBatteryPercent { get; set; }
         public int BatteryPercentDiff { get; set; }
+        public int BatteryUsagePerSecond { get; set; }
         public int CpuPerformance { get; set; }
         public int RamPerformance { get; set; }
         public int HdPerformance { get; set; }

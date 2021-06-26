@@ -1,5 +1,5 @@
 ﻿
-namespace Smart_Battery_Charger
+namespace Smart_Battery_Monitor
 {
     internal partial class FrmMain
     {
@@ -30,14 +30,15 @@ namespace Smart_Battery_Charger
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.Index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Date = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.lblTransactionsCount = new System.Windows.Forms.Label();
             this.btnReport = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.pbHD = new System.Windows.Forms.ProgressBar();
@@ -71,7 +72,7 @@ namespace Smart_Battery_Charger
             this.dtpDateTo = new System.Windows.Forms.DateTimePicker();
             this.dtpDateFrom = new System.Windows.Forms.DateTimePicker();
             this.label10 = new System.Windows.Forms.Label();
-            this.btnDelLog = new System.Windows.Forms.Button();
+            this.btnDelRecord = new System.Windows.Forms.Button();
             this.Dgv = new System.Windows.Forms.DataGridView();
             this.pnlTb = new System.Windows.Forms.Panel();
             this.label16 = new System.Windows.Forms.Label();
@@ -137,11 +138,12 @@ namespace Smart_Battery_Charger
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
+            this.tabPage1.Controls.Add(this.lblTransactionsCount);
             this.tabPage1.Controls.Add(this.btnReport);
             this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Controls.Add(this.btnMinimize);
             this.tabPage1.Controls.Add(this.pnlFilter);
-            this.tabPage1.Controls.Add(this.btnDelLog);
+            this.tabPage1.Controls.Add(this.btnDelRecord);
             this.tabPage1.Controls.Add(this.Dgv);
             this.tabPage1.Controls.Add(this.pnlTb);
             this.tabPage1.Location = new System.Drawing.Point(4, 37);
@@ -151,10 +153,21 @@ namespace Smart_Battery_Charger
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Battery Monitor";
             // 
+            // lblTransactionsCount
+            // 
+            this.lblTransactionsCount.AutoSize = true;
+            this.lblTransactionsCount.Font = new System.Drawing.Font("Segoe UI Semibold", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblTransactionsCount.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.lblTransactionsCount.Location = new System.Drawing.Point(495, 674);
+            this.lblTransactionsCount.Name = "lblTransactionsCount";
+            this.lblTransactionsCount.Size = new System.Drawing.Size(140, 31);
+            this.lblTransactionsCount.TabIndex = 46;
+            this.lblTransactionsCount.Text = "transactions";
+            // 
             // btnReport
             // 
             this.btnReport.BackColor = System.Drawing.Color.Teal;
-            this.btnReport.Location = new System.Drawing.Point(537, 654);
+            this.btnReport.Location = new System.Drawing.Point(662, 654);
             this.btnReport.Name = "btnReport";
             this.btnReport.Size = new System.Drawing.Size(168, 72);
             this.btnReport.TabIndex = 45;
@@ -335,7 +348,7 @@ namespace Smart_Battery_Charger
             // btnMinimize
             // 
             this.btnMinimize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnMinimize.Location = new System.Drawing.Point(1083, 654);
+            this.btnMinimize.Location = new System.Drawing.Point(1140, 654);
             this.btnMinimize.Name = "btnMinimize";
             this.btnMinimize.Size = new System.Drawing.Size(168, 72);
             this.btnMinimize.TabIndex = 22;
@@ -775,16 +788,16 @@ namespace Smart_Battery_Charger
             this.label10.TabIndex = 30;
             this.label10.Text = "Filter By Date and Time";
             // 
-            // btnDelLog
+            // btnDelRecord
             // 
-            this.btnDelLog.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.btnDelLog.Location = new System.Drawing.Point(822, 654);
-            this.btnDelLog.Name = "btnDelLog";
-            this.btnDelLog.Size = new System.Drawing.Size(168, 72);
-            this.btnDelLog.TabIndex = 21;
-            this.btnDelLog.Text = "Delete Record";
-            this.btnDelLog.UseVisualStyleBackColor = false;
-            this.btnDelLog.Click += new System.EventHandler(this.btnDelLog_Click);
+            this.btnDelRecord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.btnDelRecord.Location = new System.Drawing.Point(901, 654);
+            this.btnDelRecord.Name = "btnDelRecord";
+            this.btnDelRecord.Size = new System.Drawing.Size(168, 72);
+            this.btnDelRecord.TabIndex = 21;
+            this.btnDelRecord.Text = "Delete Record";
+            this.btnDelRecord.UseVisualStyleBackColor = false;
+            this.btnDelRecord.Click += new System.EventHandler(this.btnDelRecord_Click);
             // 
             // Dgv
             // 
@@ -794,23 +807,23 @@ namespace Smart_Battery_Charger
             this.Dgv.AllowUserToResizeRows = false;
             this.Dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.Dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.Dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.Dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.Dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.InactiveCaption;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.Dgv.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.InactiveCaption;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.Dgv.DefaultCellStyle = dataGridViewCellStyle2;
             this.Dgv.Location = new System.Drawing.Point(468, 6);
             this.Dgv.MultiSelect = false;
             this.Dgv.Name = "Dgv";
@@ -1058,10 +1071,11 @@ namespace Smart_Battery_Charger
             this.MinimizeBox = false;
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Smart Battery Charger";
+            this.Text = "Smart Battery Monitor";
             this.Load += new System.EventHandler(this.FrmMain_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.pnlFilter.ResumeLayout(false);
@@ -1085,7 +1099,7 @@ namespace Smart_Battery_Charger
         private System.Windows.Forms.DateTimePicker dtpDateTo;
         private System.Windows.Forms.DateTimePicker dtpDateFrom;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button btnDelLog;
+        private System.Windows.Forms.Button btnDelRecord;
         private System.Windows.Forms.DataGridView Dgv;
         private System.Windows.Forms.Panel pnlTb;
         private System.Windows.Forms.Label label5;
@@ -1134,6 +1148,7 @@ namespace Smart_Battery_Charger
         private System.Windows.Forms.TextBox txtRamUtil;
         private System.Windows.Forms.TextBox txtGpuUtil;
         private System.Windows.Forms.Button btnReport;
+        private System.Windows.Forms.Label lblTransactionsCount;
     }
 }
 

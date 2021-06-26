@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace Smart_Battery_Charger
+namespace Smart_Battery_Monitor
 {
     public record ResourcesMonitor
     {
@@ -57,7 +57,7 @@ namespace Smart_Battery_Charger
 
         public int HdMonitor()
         {
-            var hdTemp = (int) _hdCounter.NextValue();
+            var hdTemp = (int)_hdCounter.NextValue();
             return hdTemp > 100 ? 100 : hdTemp;
         }
 

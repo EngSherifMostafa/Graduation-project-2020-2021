@@ -1,4 +1,4 @@
-﻿namespace Smart_Battery_Charger
+﻿namespace Smart_Battery_Monitor
 {
     internal record RecordInfo
     {
