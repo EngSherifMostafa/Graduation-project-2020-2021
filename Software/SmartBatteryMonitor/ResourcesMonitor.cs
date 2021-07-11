@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace Smart_Battery_Monitor
 {
-    public record ResourcesMonitor
+    public class ResourcesMonitor
     {
         #region initializer
 

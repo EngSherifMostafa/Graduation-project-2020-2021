@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Smart_Battery_Monitor
 {
-    internal partial class FrmMain : Form
+    public partial class FrmMain : Form
     {
         #region initializer
 

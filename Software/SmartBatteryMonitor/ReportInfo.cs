@@ -1,6 +1,6 @@
 namespace Smart_Battery_Monitor
 {
-    internal record ReportInfo
+    public class ReportInfo
     {
         public string CurrentDate { get; set; }
         public string LagDate { get; set; }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Smart_Battery_Monitor
 {
-    internal class DataBaseManagement
+    public class DataBaseManagement
     {
         #region initializer
 

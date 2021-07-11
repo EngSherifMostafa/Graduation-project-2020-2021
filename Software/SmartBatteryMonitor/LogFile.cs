@@ -8,7 +8,7 @@ using static System.IO.Directory;
 
 namespace Smart_Battery_Monitor
 {
-    internal class LogFile
+    public class LogFile
     {
         private readonly StreamWriter _logFile;
         private readonly List<ReportInfo> _reportList;

@@ -1,6 +1,6 @@
 ﻿namespace Smart_Battery_Monitor
 {
-    internal record RecordInfo
+    public class RecordInfo
     {
         public int Index { get; set; }
         public string Date { get; set; }

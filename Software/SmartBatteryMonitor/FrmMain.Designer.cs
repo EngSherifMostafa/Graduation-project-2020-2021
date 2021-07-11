@@ -1,7 +1,7 @@
 ﻿
 namespace Smart_Battery_Monitor
 {
-    internal partial class FrmMain
+    public partial class FrmMain
     {
         /// <summary>
         ///  Required designer variable.
