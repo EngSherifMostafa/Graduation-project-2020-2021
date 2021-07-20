@@ -21,15 +21,20 @@ CREATE TABLE tblLogFile
 )
 
 
+--before insert, check to keep a constant number of records in the table
+SELECT COUNT(*) FROM tblLogFile
+DELETE FROM [tblLogFile] WHERE colIndex IN (SELECT TOP 100 colIndex FROM tblLogFile ORDER BY (PARSE(CONCAT(colDate, ' ', colTime) AS DATETIME)))
+
+
 --insert statement
 INSERT INTO tblLogFile VALUES
 (
 	(FORMAT (GETDATE(), 'dd MMMM yyyy')), 
 	(FORMAT (GETDATE(), 'hh:mm:ss tt')), 
-	70, 
-	'Offline',
+	79, 
+	'Online',
+	15,
 	50,
-	60,
 	2
 )
 
@@ -37,9 +42,12 @@ INSERT INTO tblLogFile VALUES
 --delete statement
 DELETE FROM [tblLogFile] WHERE colIndex = 154
 
+
+--count number of records
 SELECT COUNT(*) FROM tblLogFile
 
---select * from main table
+
+--select all from main table
 SELECT
 	colIndex AS [Index],
 	FORMAT ([colDate], 'dd MMMM yyyy') AS [Date],
@@ -50,6 +58,7 @@ SELECT
 	[colRamPerformance] AS [Ram Utilization],
 	[colHardDiskPerformance] AS [Hard Disk Utilization]
 FROM [tblLogFile]
+
 
 --create view for report
 CREATE VIEW [vWReport]
@@ -63,6 +72,7 @@ CREATE VIEW [vWReport]
 		[tblLogFile].[colCpuPerformance], [tblLogFile].[colRamPerformance], [tblLogFile].[colHardDiskPerformance], [tblLogFile].[colChargerStatus]
 	FROM tblLogFile
 
+
 --create report from view
 SELECT
 	[vWReport].[colCurrentDate], [vWReport].[colLagDate],
@@ -71,7 +81,7 @@ SELECT
 	ABS(ISNULL(
 	(DATEDIFF(SECOND, [vWReport].[colLagDate], [vWReport].[colCurrentDate])) /
 	NULLIF(([vWReport].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]), 0), 0))
-	AS [colBatteryUsagePerSecond],
+	AS [colTimeOfBatteryChangeOnePercentUpOrDown],
 	[vWReport].[colCpuPerformance], [vWReport].[colRamPerformance], [vWReport].[colHardDiskPerformance], [vWReport].[colChargerStatus]
 FROM vWReport
 WHERE [vWReport].[colCurrentDate] BETWEEN '2021-06-11 00:51:10' AND '2021-06-26 14:05:15'

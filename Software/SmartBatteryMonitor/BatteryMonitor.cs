@@ -12,17 +12,18 @@ namespace Smart_Battery_Monitor
         // 2- define event on delegate
         public event EventHandler PercentChanged;
 
-        #endregion
-
-        #region eventHandler
-
         //constructor
         public BatteryMonitor()
         {
-            //SerialPort serialPort = new SerialPort();
-            var monitorThread = new Thread(CheckPercentageChanging) { Name = "threadCheckPercentageChanging", IsBackground = true };
+            var monitorThread = new Thread(CheckPercentageChanging)
+                { Name = "threadCheckPercentageChanging", IsBackground = true };
             monitorThread.Start();
         }
+
+        #endregion
+
+
+        #region eventHandler
 
         //looping till battery percent change by 1%
         private void CheckPercentageChanging()
@@ -45,30 +46,5 @@ namespace Smart_Battery_Monitor
         protected virtual void OnPercentChanged() => PercentChanged?.Invoke(this, EventArgs.Empty);
 
         #endregion
-
-
-        //private void SendSignal(string command, int timeInSecond)
-        //{
-        //    check if bluetooth module port is open :
-        //    if (serialPort.IsOpen)
-        //    {
-
-        //        serialPort.Write(command);
-        //        Thread.Sleep(timeInSecond);
-        //    }
-
-        //}
-
-        //private void ReceiveSignal(ref string dataReceived)
-        //{
-
-        //    if (serialPort.IsOpen)
-        //    {
-        //        if (serialPort.BytesToRead > 0)
-        //            dataReceived = serialPort.ReadLine();
-
-        //    }
-        //}
-
     }
 }

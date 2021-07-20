@@ -62,19 +62,21 @@ namespace Smart_Battery_Monitor
                                $"{PrintLine()}\n");
 
                 _logFile.Write(
-                    $"\nAverage Battery Usage Up/Down 1%       : {Math.Ceiling(_reportList.Average(batteryPerSec => batteryPerSec.BatteryUsagePerSecond))} Second" +
+                    "\nAverage Battery Usage Up/Down 1%       : " +
+                    $"{Math.Ceiling(_reportList.Average(batteryPerSec => batteryPerSec.BatteryUsagePerSecond))} Second" +
+                    "\nAverage Battery Time from 100% to 0%   : " +
+                    $"{Math.Ceiling(_reportList.Average(batteryPerSec => batteryPerSec.BatteryUsagePerSecond) * 100 / 3600)} Hour" +
                     "\nAverage Processor Usage                : " +
-                    $"{Math.Ceiling(_reportList.Average(cpuUsage => cpuUsage.CpuPerformance))}" +
+                    $"{Math.Ceiling(_reportList.Average(cpuUsage => cpuUsage.CpuPerformance))} %" +
                     "\nAverage RAM Usage                      : " +
-                    $"{Math.Ceiling(_reportList.Average(ramUsage => ramUsage.RamPerformance))}" +
+                    $"{Math.Ceiling(_reportList.Average(ramUsage => ramUsage.RamPerformance))} %" +
                     "\nAverage Hard Disk Usage                : " +
-                    $"{Math.Ceiling(_reportList.Average(hdUsage => hdUsage.HdPerformance))}" +
+                    $"{Math.Ceiling(_reportList.Average(hdUsage => hdUsage.HdPerformance))} %" +
                     "\n# of Charger Online                    : " +
                     $"{_reportList.Count(onlineCharger => Strings.Trim(onlineCharger.ChargerStatus) == "Online")}" +
                     "\n# of Charger Offline                   : " +
                     $"{_reportList.Count(onlineCharger => onlineCharger.ChargerStatus == "Offline")}" +
-                    "\n# of Records                           : " +
-                    $"{_reportList.Count}" +
+                    "\n# of Records                           : " + $"{_reportList.Count}" +
                     $"\n{PrintLine()}\n\n"
                 );
 
@@ -85,7 +87,7 @@ namespace Smart_Battery_Monitor
                     "Battery Percent at End Date    \t\t" +
                     "Diff Date in Seconds           \t" +
                     "Diff Battery                   \t" +
-                    "Battery Consumption per Second \t\t" +
+                    "Battery Change 1% Up Or Down \t\t" +
                     "Processor Utilization          \t" +
                     "RAM Utilization                \t" +
                     "Hard Disk Utilization          \t" +
@@ -121,37 +123,6 @@ namespace Smart_Battery_Monitor
             }
         }
 
-        public static KeyValuePair<string, string> Convert24To12HourSystem(int hoursIn24) =>
-            hoursIn24 switch
-            {
-                0 => new KeyValuePair<string, string>(@"AM", "12"),
-                1 => new KeyValuePair<string, string>(@"AM", "01"),
-                2 => new KeyValuePair<string, string>(@"AM", "02"),
-                3 => new KeyValuePair<string, string>(@"AM", "03"),
-                4 => new KeyValuePair<string, string>(@"AM", "04"),
-                5 => new KeyValuePair<string, string>(@"AM", "05"),
-                6 => new KeyValuePair<string, string>(@"AM", "06"),
-                7 => new KeyValuePair<string, string>(@"AM", "07"),
-                8 => new KeyValuePair<string, string>(@"AM", "08"),
-                9 => new KeyValuePair<string, string>(@"AM", "09"),
-                10 => new KeyValuePair<string, string>(@"AM", "10"),
-                11 => new KeyValuePair<string, string>(@"AM", "11"),
-
-                12 => new KeyValuePair<string, string>(@"PM", "12"),
-                13 => new KeyValuePair<string, string>(@"PM", "01"),
-                14 => new KeyValuePair<string, string>(@"PM", "02"),
-                15 => new KeyValuePair<string, string>(@"PM", "03"),
-                16 => new KeyValuePair<string, string>(@"PM", "04"),
-                17 => new KeyValuePair<string, string>(@"PM", "05"),
-                18 => new KeyValuePair<string, string>(@"PM", "06"),
-                19 => new KeyValuePair<string, string>(@"PM", "07"),
-                20 => new KeyValuePair<string, string>(@"PM", "08"),
-                21 => new KeyValuePair<string, string>(@"PM", "09"),
-                22 => new KeyValuePair<string, string>(@"PM", "10"),
-                23 => new KeyValuePair<string, string>(@"PM", "11"),
-                _ => new KeyValuePair<string, string>(string.Empty, string.Empty)
-            };
-
         public static string Convert12To24HourSystem(int hoursIn12, string tt) =>
             tt switch
             {
@@ -181,6 +152,37 @@ namespace Smart_Battery_Monitor
                 @"PM" when hoursIn12 == 10 => "22",
                 @"PM" when hoursIn12 == 11 => "23",
                 _ => string.Empty
+            };
+
+        public static KeyValuePair<string, string> Convert24To12HourSystem(int hoursIn24) =>
+            hoursIn24 switch
+            {
+                0 => new KeyValuePair<string, string>(@"AM", "12"),
+                1 => new KeyValuePair<string, string>(@"AM", "01"),
+                2 => new KeyValuePair<string, string>(@"AM", "02"),
+                3 => new KeyValuePair<string, string>(@"AM", "03"),
+                4 => new KeyValuePair<string, string>(@"AM", "04"),
+                5 => new KeyValuePair<string, string>(@"AM", "05"),
+                6 => new KeyValuePair<string, string>(@"AM", "06"),
+                7 => new KeyValuePair<string, string>(@"AM", "07"),
+                8 => new KeyValuePair<string, string>(@"AM", "08"),
+                9 => new KeyValuePair<string, string>(@"AM", "09"),
+                10 => new KeyValuePair<string, string>(@"AM", "10"),
+                11 => new KeyValuePair<string, string>(@"AM", "11"),
+
+                12 => new KeyValuePair<string, string>(@"PM", "12"),
+                13 => new KeyValuePair<string, string>(@"PM", "01"),
+                14 => new KeyValuePair<string, string>(@"PM", "02"),
+                15 => new KeyValuePair<string, string>(@"PM", "03"),
+                16 => new KeyValuePair<string, string>(@"PM", "04"),
+                17 => new KeyValuePair<string, string>(@"PM", "05"),
+                18 => new KeyValuePair<string, string>(@"PM", "06"),
+                19 => new KeyValuePair<string, string>(@"PM", "07"),
+                20 => new KeyValuePair<string, string>(@"PM", "08"),
+                21 => new KeyValuePair<string, string>(@"PM", "09"),
+                22 => new KeyValuePair<string, string>(@"PM", "10"),
+                23 => new KeyValuePair<string, string>(@"PM", "11"),
+                _ => new KeyValuePair<string, string>(string.Empty, string.Empty)
             };
     }
 }

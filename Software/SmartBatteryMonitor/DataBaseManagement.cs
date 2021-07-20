@@ -15,6 +15,7 @@ namespace Smart_Battery_Monitor
 
         #endregion
 
+
         #region publicMethods
 
         public static string SelectStm() =>
@@ -42,25 +43,32 @@ namespace Smart_Battery_Monitor
                         ABS(ISNULL(
 	                    (DATEDIFF(SECOND, [vWReport].[colLagDate], [vWReport].[colCurrentDate])) /
 	                    NULLIF(([vWReport].[colBatteryPercent] - [vWReport].[colLagBatteryPercent]), 0), 0))
-	                    AS [colBatteryUsagePerSecond],
+	                    AS [colTimeOfBatteryChangeOnePercentUpOrDown],
 	                    [vWReport].[colCpuPerformance], [vWReport].[colRamPerformance], [vWReport].[colHardDiskPerformance],
                         [vWReport].[colChargerStatus]
                         FROM vWReport
                         WHERE [vWReport].[colCurrentDate] BETWEEN '{startDate}' AND '{endDate}'
                         ORDER BY [vWReport].[colIndex]");
 
-        public static string InsertStm(int batteryPercentage, string chargerStatus,
-            int cpuUtilization, int ramUtilization, int hdUtilization) =>
-            ExecuteNonQuery(
-                @$"INSERT INTO tblLogFile VALUES (
-                (FORMAT (GETDATE(), 'dd MMMM yyyy')), (FORMAT (GETDATE(), 'hh:mm:ss tt')), 
-                {batteryPercentage}, '{chargerStatus}',
-                {cpuUtilization}, {ramUtilization}, {hdUtilization})");
+        public static string InsertStm(int batteryPercentage, string chargerStatus, int cpuUtilization,
+            int ramUtilization, int hdUtilization)
+        {
+            if (Convert.ToInt32(SelectStm()) >= 1000)
+                ExecuteNonQuery(
+                    "DELETE FROM [tblLogFile] WHERE colIndex IN" +
+                    "(SELECT TOP 100 colIndex FROM tblLogFile" +
+                    "ORDER BY (PARSE(CONCAT(colDate, ' ', colTime) AS DATETIME)))");
+
+            return ExecuteNonQuery(
+                @$"INSERT INTO tblLogFile VALUES ((FORMAT (GETDATE(), 'dd MMMM yyyy')), (FORMAT (GETDATE(), 'hh:mm:ss tt')), 
+                        {batteryPercentage}, '{chargerStatus}', {cpuUtilization}, {ramUtilization}, {hdUtilization})");
+        }
 
         public static string DeleteStm(int recIndex) =>
             ExecuteNonQuery($"DELETE FROM tblLogFile WHERE colIndex = {recIndex}");
 
         #endregion
+
 
         #region executionMethods
 
@@ -122,7 +130,7 @@ namespace Smart_Battery_Monitor
                         BatteryPercent = Convert.ToInt32(reader["colBatteryPercent"]),
                         LagBatteryPercent = Convert.ToInt32(reader["colLagBatteryPercent"]),
                         BatteryPercentDiff = Convert.ToInt32(reader["colBatteryPercentDiff"]),
-                        BatteryUsagePerSecond = Convert.ToInt32(reader["colBatteryUsagePerSecond"]),
+                        BatteryUsagePerSecond = Convert.ToInt32(reader["colTimeOfBatteryChangeOnePercentUpOrDown"]),
                         CpuPerformance = Convert.ToInt32(reader["colCpuPerformance"]),
                         RamPerformance = Convert.ToInt32(reader["colRamPerformance"]),
                         HdPerformance = Convert.ToInt32(reader["colHardDiskPerformance"]),

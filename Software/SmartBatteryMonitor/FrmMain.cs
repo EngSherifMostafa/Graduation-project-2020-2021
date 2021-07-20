@@ -12,11 +12,18 @@ namespace Smart_Battery_Monitor
     {
         #region initializer
 
+        //battery percentage default values for charge and discharge
+        private const int DISCONNECT = 80;
+        private const int CONNECT = 20;
+
         //declare list of class RecordInfo to be data source for data grid view
         private readonly List<RecordInfo> _recordsList;
 
         //declare Resource Monitor that collects data about user usage
         private readonly ResourcesMonitor _resourcesMonitor;
+
+        //declare object from Bluetooth class
+        private readonly Bluetooth _bluetooth;
 
         //declare BindingSource to Refresh Dgv.DataSource
         private readonly BindingSource _bindingSource;
@@ -30,9 +37,10 @@ namespace Smart_Battery_Monitor
         public FrmMain()
         {
             InitializeComponent();
-            _bindingSource = new BindingSource();
             _recordsList = new List<RecordInfo>();
             _resourcesMonitor = new ResourcesMonitor();
+            _bluetooth = new Bluetooth();
+            _bindingSource = new BindingSource();
 
             //get battery percent at initialization time and format DateTimePickers
             lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
@@ -50,18 +58,23 @@ namespace Smart_Battery_Monitor
             //add SystemEvents_PowerModeChanged event using Microsoft.Win32 API
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-            //add GetBatteryPercentage to PercentChanged event
+            //add GetBatteryPercentage and ConnectAndDisconnect to PercentChanged event
             _resourcesMonitor.BatteryMonitor.PercentChanged += GetBatteryPercentage;
+            _resourcesMonitor.BatteryMonitor.PercentChanged += ConnectAndDisconnect;
 
             //add InsertAtChange to PercentChanged event
             _resourcesMonitor.BatteryMonitor.PercentChanged += InsertAtChange;
 
             //set default values to filter combo-boxes and dateTimePickers and change dgv headers name
             ResetDgvHeaders();
+
+            //call ConnectAndDisconnect method to check the connectivity status
+            ConnectAndDisconnect(new object(), new EventArgs());
         }
 
         #endregion
         
+
         #region notifyIcon
 
         //minimize form from btnMinimize button
@@ -91,6 +104,7 @@ namespace Smart_Battery_Monitor
         {
             void LocalNotifyIconBalloonTipClicked()
             {
+                GetBatteryPercentage(new object(),new EventArgs());
                 notifyIcon.Visible = false;
                 Visible = true;
             }
@@ -106,6 +120,7 @@ namespace Smart_Battery_Monitor
             notifyIcon_BalloonTipClicked(sender, e);
 
         #endregion
+
 
         #region databaseHandling
 
@@ -170,53 +185,90 @@ namespace Smart_Battery_Monitor
 
         #endregion
 
+
         #region resourceUsage
 
         private void UpdateResourcesUsage()
         {
-        tryAgain:
-            try
+            while (Visible)
             {
-                Invoke(new MethodInvoker(delegate
+                try
                 {
-                    var cpuTemp = _resourcesMonitor.CpuMonitor();
-                    var ramTemp = _resourcesMonitor.RamMonitor();
-                    var hdTemp = _resourcesMonitor.HdMonitor();
+                    Invoke(new MethodInvoker(delegate
+                    {
+                        var cpuTemp = _resourcesMonitor.CpuMonitor();
+                        var ramTemp = _resourcesMonitor.RamMonitor();
+                        var hdTemp = _resourcesMonitor.HdMonitor();
 
-                    pbCpu.Value = cpuTemp;
-                    lblCpuPercent.Text = cpuTemp + @" %";
+                        pbCpu.Value = cpuTemp;
+                        lblCpuPercent.Text = cpuTemp + @" %";
 
-                    pbRam.Value = ramTemp;
-                    lblRamPercent.Text = ramTemp + @" %";
+                        pbRam.Value = ramTemp;
+                        lblRamPercent.Text = ramTemp + @" %";
 
-                    pbHD.Value = hdTemp;
-                    lblHDPercent.Text = hdTemp + @" %";
-                }));
+                        pbHD.Value = hdTemp;
+                        lblHDPercent.Text = hdTemp + @" %";
+                    }));
+                }
+                //error in calculation from performance system
+                catch (Exception err)
+                {
+                    MessageBox.Show(err.Message, @"UpdateResourcesUsage");
+                }
+                finally
+                {
+                    Thread.Sleep(1000);
+                }
             }
-            //error in calculation from performance system
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message, @"UpdateResourcesUsage");
-            }
-            finally
-            {
-                Thread.Sleep(1000);
-            }
-
-            goto tryAgain;
         }
 
         #endregion
 
+
         #region batteryPercentage
+
+        //send signal
+        private void ConnectAndDisconnect(object source, EventArgs e)
+        {
+            void LocalConnectAndDisconnect()
+            {
+                //send Bluetooth signal
+                switch (_resourcesMonitor.BatteryPercent)
+                {
+                    case <= CONNECT: //true  => Connect charger
+                        _bluetooth.SendSignal(true);
+                        break;
+                    case >= DISCONNECT: //false => Disconnect charger
+                        _bluetooth.SendSignal(false);
+                        break;
+                }
+            }
+
+            if (InvokeRequired)
+                Invoke(new MethodInvoker(LocalConnectAndDisconnect));
+            else
+                LocalConnectAndDisconnect();
+        }
 
         //get battery percentage
         private void GetBatteryPercentage(object source, EventArgs e)
         {
+            if (!Visible) return;
+
+            void LocalGetBatteryPercentage()
+            {
+                //change battery percentage in lblBatteryNow using UI thread
+                if (InvokeRequired)
+                    Invoke(new MethodInvoker(
+                        delegate { lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %"; }));
+                else
+                    lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
+            }
+
             if (InvokeRequired)
-                Invoke(new MethodInvoker(delegate { lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %"; }));
+                Invoke(new MethodInvoker(LocalGetBatteryPercentage));
             else
-                lblBatteryNow.Text = @$"{_resourcesMonitor.BatteryPercent} %";
+                LocalGetBatteryPercentage();
         }
 
         //PowerModeChanged event
@@ -238,6 +290,7 @@ namespace Smart_Battery_Monitor
 
         #endregion
         
+
         #region buttonsEvents
 
         private void btnFilter_Click(object sender, EventArgs e)
@@ -319,6 +372,7 @@ namespace Smart_Battery_Monitor
 
         #endregion
         
+
         #region textboxes
 
         //fill text boxes according to user selection from Dgv at two events ( Dgv_RowEnter & Dgv_RowsRemoved )
@@ -371,6 +425,7 @@ namespace Smart_Battery_Monitor
 
         #endregion
 
+        
         #region resetControls
 
         private void ResetDgv(List<RecordInfo> dataSource)
