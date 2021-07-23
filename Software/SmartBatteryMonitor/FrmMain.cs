@@ -13,8 +13,8 @@ namespace Smart_Battery_Monitor
         #region initializer
 
         //battery percentage default values for charge and discharge
-        private const int DISCONNECT = 80;
-        private const int CONNECT = 20;
+        private const int Disconnect = 80;
+        private const int Connect = 20;
 
         //declare list of class RecordInfo to be data source for data grid view
         private readonly List<RecordInfo> _recordsList;
@@ -230,24 +230,16 @@ namespace Smart_Battery_Monitor
         //send signal
         private void ConnectAndDisconnect(object source, EventArgs e)
         {
-            void LocalConnectAndDisconnect()
+            //send Bluetooth signal
+            switch (_resourcesMonitor.BatteryPercent)
             {
-                //send Bluetooth signal
-                switch (_resourcesMonitor.BatteryPercent)
-                {
-                    case <= CONNECT: //true  => Connect charger
-                        _bluetooth.SendSignal(true);
-                        break;
-                    case >= DISCONNECT: //false => Disconnect charger
-                        _bluetooth.SendSignal(false);
-                        break;
-                }
+                case <= Connect: //true  => Connect charger
+                    _bluetooth.SendSignal(true);
+                    break;
+                case >= Disconnect: //false => Disconnect charger
+                    _bluetooth.SendSignal(false);
+                    break;
             }
-
-            if (InvokeRequired)
-                Invoke(new MethodInvoker(LocalConnectAndDisconnect));
-            else
-                LocalConnectAndDisconnect();
         }
 
         //get battery percentage

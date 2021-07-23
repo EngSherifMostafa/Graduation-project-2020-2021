@@ -1,6 +1,5 @@
 using System;
 using System.IO.Ports;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace Smart_Battery_Monitor
@@ -14,17 +13,30 @@ namespace Smart_Battery_Monitor
 
         public Bluetooth()
         {
-            //initialize object from SerialPort lib
-            _serialPort = new SerialPort { PortName = "COM6", BaudRate = 9600 };
+            var errPortMsg = string.Empty;
+            string[] arrCom = {"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9"};
 
-            //open port
-            try
+            foreach (var port in arrCom)
             {
-                _serialPort.Open();
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message, @"Bluetooth");
+                try
+                {
+                    //initialize object from SerialPort lib
+                    _serialPort = new SerialPort {PortName = port, BaudRate = 9600};
+
+                    //open port
+                    _serialPort.Open();
+                }
+
+                catch (Exception err)
+                {
+                    errPortMsg = err.Message;
+                    continue;
+                }
+
+                if (port.Equals(arrCom[^1]) && errPortMsg != string.Empty) //^1 => last index in array
+                    MessageBox.Show(errPortMsg, @"Bluetooth");
+
+                break;
             }
         }
 
@@ -37,9 +49,21 @@ namespace Smart_Battery_Monitor
         //false => Disconnect charger
         public void SendSignal(bool command)
         {
-            if (!_serialPort.IsOpen) return;
-            _serialPort.Write(command ? "1" : "0");
-            Thread.Sleep(1000);
+            try
+            {
+                if (!_serialPort.IsOpen) _serialPort.Open();
+                _serialPort.Write(command ? "1" : "0");
+            }
+
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, @"SendSignal");
+            }
+
+            finally
+            {
+                _serialPort.Close();
+            }
         }
 
         #endregion
