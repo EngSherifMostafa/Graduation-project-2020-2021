@@ -40,7 +40,7 @@ INSERT INTO tblLogFile VALUES
 
 
 --delete statement
-DELETE FROM [tblLogFile] WHERE colIndex = 154
+DELETE FROM [tblLogFile] WHERE colIndex = 282
 
 
 --count number of records
